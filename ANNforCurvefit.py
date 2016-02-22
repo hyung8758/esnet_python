@@ -19,6 +19,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 import loadfile
+import matplotlib.pyplot as plt
 
 from SetValues import SetValues
 from ANN_model import ANN_model
@@ -97,8 +98,11 @@ def anncurvefit_train():
         #accuracy = np.mean(np.argmax(test_out,axis=1) == predict(test_in))
         #print '\tAccuracy: {} percent'.format(accuracy)
 
+    print '\nprocess finished.\nTesting the result...'
 
-    print '\nprocess finished.\n'
+    # Calculating correlation.
+
+
 
 if __name__ == '__main__':
     anncurvefit_train()
