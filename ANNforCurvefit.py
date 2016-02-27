@@ -1,28 +1,32 @@
 # -*- coding: utf-8 -*-
 '''
-Artificial Neural Network for Classification and Curvefitting problems.
+Artificial Neural Network for Curvefitting problems (regression).
+(Online learning)
 
 This script is written for activating a simple artificial neural network. (ANN)
 Please refer to the step as follows.
 
-IT needs to be built!!!!!!
-for curvefitting
-
+1. Choose the dataset and uncomment it in order to train the dataset.
+   (Find more datasets in the loadfile.py script.)
+2. Adjust parameters such as learningrate, momentum or hiddenunits.
+   Manipulating the parameters is required to derive the best learning performance
+   and it might be achieved when the combination of parameters reflects the characteristics
+   of the datasets.
+3. After training and testing sessions, MSE (Mean Square Error) and pearson r will be displayed.
+   The visual plotting that explains the learning result will also help the interpretation.
 
                                                                     Written by Hyungwon Yang
                                                                                 2016. 02. 10
                                                                                     EMCS Lab
 '''
-from random import choice
 
 import numpy as np
 import theano
-import theano.tensor as T
 import loadfile
-import matplotlib.pyplot as plt
+import errortools as et
 
-from SetValues import SetValues
-from ANN_model import ANN_model
+from SetValues import SetANN
+from NetworkModel import ANN_model
 
 
 
@@ -30,7 +34,7 @@ def anncurvefit_train():
 
     print 'Loading the data...'
 
-    # Import cancerData
+    # Import mfcc data
     train_in, train_out, test_in, test_out = loadfile.readartmfcc()
 
     # Import bodyfat (optional)
@@ -42,19 +46,19 @@ def anncurvefit_train():
     print 'Assigning the data variables...'
 
     # Generate initial values.
-    values = SetValues(inputs=train_in,
+    values = SetANN(inputs=train_in,
                        outputs=train_out,
                        learningRate=0.001,
                        momentum=0.9,
-                       epochNum=100,
+                       epochNum=30,
                        hiddenUnits=50,
                        W=None,
                        b=None)
     ihMatrix,hoMatrix = values.genWeight()
     hBiasMatrix, oBiasMatrix = values.genBias()
     inX, outY = values.genMatrices()
-
-    batchSize = 10
+    # error display rate
+    error_epoch = 10 # 1 out of 10
 
     print 'Constructing ANN_model...'
 
@@ -69,39 +73,65 @@ def anncurvefit_train():
     outputStorage, outputActivation = models.fnn(methods='curvefitting')
     cost, updates = models.sgd2(outputStorage)
 
+    # Train and Predict function.
     train = theano.function(inputs=[inX,outY],outputs=cost,updates=updates,allow_input_downcast=True)
     predict = theano.function(inputs=[inX],outputs=outputActivation,allow_input_downcast=True)
 
+
+################################
+#####   TRAINING SESSION   #####
+################################
+
+    # Training the data
     print 'Training the data...'
 
-    total_epoches = range(values.epoches())
-    input_epoches = len(train_in)/batchSize
-    for epoch in total_epoches: # 총 몇번인가.. 그랜드 에포크 한 20번정도? 여기는 모든 인풋데이터가 한번 도는걸 의미함
+    total_epoch = range(values.epochs())
+    for epoch in total_epoch:
 
         error_history = []
-        # Shuffling inputs and outputs # 인풋 데이터 돌리기전에 한번 순서들을 섞어줘야함
+        # Shuffling inputs and outputs
         rand_num = np.random.permutation(len(train_in))
         train_in = train_in[rand_num]
         train_out = train_out[rand_num]
 
-        #total_inputs = range(train_in.shape[0])
-        for batch_in,batch_out in zip(range(0,train_in.shape[0],batchSize),range(batchSize,train_in.shape[0],batchSize)):
-        #for iter in total_inputs:
-            error = train(train_in[batch_in:batch_out],train_out[batch_in:batch_out])
+        # online learning.
+        for data_in,data_out in zip(range(train_in.shape[0]),range(1,train_in.shape[0]+1)):
+
+            error = train(train_in[data_in:data_out],train_out[data_in:data_out])
             error_history.append(error)
 
         error_sum = np.mean(error_history)
 
-        # print error rate and prediction correctness
-        #error_sum = np.mean(error_history)
-        print 'Epoch: {}, error: {}.'.format(epoch+1,error_sum)
-        #accuracy = np.mean(np.argmax(test_out,axis=1) == predict(test_in))
-        #print '\tAccuracy: {} percent'.format(accuracy)
+        if epoch%error_epoch == 0:
+            # print error rate and prediction correctness
+            print 'Epoch: {}, error: {}.'.format(epoch+1,error_sum)
 
-    print '\nprocess finished.\nTesting the result...'
+    print '\nprocess finished.\n\nTesting the result...'
 
-    # Calculating correlation.
 
+###############################
+#####   TESTING SESSION   #####
+###############################
+
+    # Testing the trained model.
+    test_error_history =[]
+
+    # Extract the results by processing test inputs.
+    for data_test_in,data_test_out in zip(range(test_in.shape[0]),range(1,test_in.shape[0]+1)):
+
+            test_error = predict(test_in[data_test_in:data_test_out])
+            test_error_history.append(test_error)
+
+    # Calculating MSE and correlation coefficients
+    MSE = et.MSE(test_out,test_error_history)
+    cor_coef = et.pearsonR(test_out,test_error_history)
+    print 'Testing completed. Testing Result is as follows\nMSE          : {}\nCorrelation r: {}'.format(round(MSE,2),round(cor_coef,3))
+
+    # Plotting correlation data
+    print 'Displaying correlation graph...\n The plot will be displayed in a moment.'
+    et.correlationplot(test_out,test_error_history)
+
+    print'ANN learning procedure has been completed.'
 
 
 if __name__ == '__main__':

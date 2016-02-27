@@ -39,8 +39,8 @@ def readbody():
 	test_out = bodyfatTargets[200:253]
 	test_in = bodyfatInputs[200:253]
 
-	print 'Data details...'
-	print 'Train data: 200 examples, Test data: 52 examples\nInputs: 13 features, Outputs: 1 feqtures\n'
+	print 'Data Information'
+	print 'Train data: 200 examples, Test data: 52 examples\nInputs: 13 features, Outputs: 1 feature\n'
 	return train_in, train_out, test_in, test_out
 
 # Import buildingData
@@ -56,8 +56,8 @@ def readbuilding():
 	test_out = buildingTargets[3400:4209]
 	test_in = buildingTargets[3400:4209]
 
-	print 'Data details...'
-	print 'Train data: 3,400 examples, Test data: 808 examples\nInputs: 14 features, Outputs: 3 feqtures\n'
+	print 'Data Information'
+	print 'Train data: 3,400 examples, Test data: 808 examples\nInputs: 14 features, Outputs: 3 features\n'
 	return train_in, train_out, test_in, test_out
 
 # Import art_mfcc Data
@@ -74,8 +74,8 @@ def readartmfcc():
 	test_out = art_V[12000:16001]
 	test_in = mfcc_V[12000:16001]
 
-	print 'Data details...'
-	print 'Train data: 12,000 examples, Test data: 4,000 examples\nInputs: 39 features, Outputs: 16 feqtures(x&y pairs, total 8 pallet locations)\n'
+	print 'Data Information'
+	print 'Train data: 12,000 examples, Test data: 4,000 examples\nInputs: 39 features, Outputs: 16 features(x&y pairs, total 8 pallet locations)\n'
 	return train_in, train_out, test_in, test_out
 
 
@@ -91,20 +91,19 @@ def one_hot(x,n):
 	return o_h
 
 def readmnist(ntrain=60000,ntest=10000,onehot=True):
-	data_dir = os.path.join(data_path ,'mnist/')
-	fd = open(os.path.join(data_dir,'train-images-idx3-ubyte'))
+	fd = open(os.path.join(data_path,'train-images-idx3-ubyte'))
 	loaded = np.fromfile(file=fd,dtype=np.uint8)
 	trX = loaded[16:].reshape((60000,28*28)).astype(float)
 
-	fd = open(os.path.join(data_dir,'train-labels-idx1-ubyte'))
+	fd = open(os.path.join(data_path,'train-labels-idx1-ubyte'))
 	loaded = np.fromfile(file=fd,dtype=np.uint8)
 	trY = loaded[8:].reshape((60000))
 
-	fd = open(os.path.join(data_dir,'t10k-images-idx3-ubyte'))
+	fd = open(os.path.join(data_path,'t10k-images-idx3-ubyte'))
 	loaded = np.fromfile(file=fd,dtype=np.uint8)
 	teX = loaded[16:].reshape((10000,28*28)).astype(float)
 
-	fd = open(os.path.join(data_dir,'t10k-labels-idx1-ubyte'))
+	fd = open(os.path.join(data_path,'t10k-labels-idx1-ubyte'))
 	loaded = np.fromfile(file=fd,dtype=np.uint8)
 	teY = loaded[8:].reshape((10000))
 
@@ -124,7 +123,7 @@ def readmnist(ntrain=60000,ntest=10000,onehot=True):
 		train_y = np.asarray(trY)
 		test_y = np.asarray(teY)
 
-	print 'Data details...'
+	print 'Data Information'
 	print 'Train data:60,000 examples, Test data: 10,000 examples\nInputs: 784 features, Outputs: 10 classification(0-9 digits)\n'
 	return train_x, train_y, test_x, test_y
 
@@ -144,6 +143,6 @@ def readcancer():
 	test_in = inputs[:,550:701].transpose()
 	test_out = outputs[:,550:701].transpose()
 
-	print 'Data details...'
+	print 'Data Information'
 	print 'Train data: 550 examples, Test data: 150 examples\nInputs: 9 features, Outputs: 2 classification(cancer or not)\n'
 	return train_in, train_out, test_in, test_out

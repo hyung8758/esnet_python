@@ -1,32 +1,26 @@
 # -*- coding: utf-8 -*-
 '''
-Artificial Neural Network for Classification and Curvefitting problems.
-
-This script is written for activating a simple artificial neural network. (ANN)
-Please refer to the step as follows.
-
-1. Import a sample example set from Matlab.
-    * You need to understand the structure and the characteristics of the inputs and outputs
-2.
-
+For setting default values of ANN and DBN.
 
                                                                     Written by Hyungwon Yang
                                                                                 2016. 02. 10
                                                                                     EMCS Lab
 '''
+
 import numpy as np
 import theano
 import theano.tensor as T
 
 
-class SetValues(object):
+# Setting the ANN default value.
+class SetANN(object):
 
-    def __init__(self,inputs,outputs,learningRate=0.001,
-                 momentum=0.9,epochNum=25,hiddenUnits=50,W=None,b=None):
+    def __init__(self,inputs,outputs,learningRate,
+                 momentum,epochNum,hiddenUnits,W=None,b=None):
         self.inputs = inputs
         self.outputs = outputs
-        self.lr = learningRate
-        self.momentum = momentum
+        self.lr = learningRate if learningRate is not None else 0.01
+        self.momentum = momentum if momentum is not None else 0.9
         self.epochNum = epochNum
         self.hiddenUnits = hiddenUnits
         self.W = W
@@ -36,11 +30,12 @@ class SetValues(object):
         assert len(self.inputs) and len(self.outputs) > 0
 
         #  initial weight and bias
-        self.genRan_w_ih = np.random.RandomState(3493)
-        self.genRan_w_ho = np.random.RandomState(9244)
+        seed_one,seed_two = np.random.randint(100,999,2)
+        self.genRan_w_ih = np.random.RandomState(seed_one)
+        self.genRan_w_ho = np.random.RandomState(seed_two)
         self.addrange = 0.1
 
-    def epoches(self):
+    def epochs(self):
         return self.epochNum
 
     def floatX(self,value):
@@ -70,3 +65,102 @@ class SetValues(object):
         self.inX = T.fmatrix('inputs')
         self.outY = T.fmatrix('outputs')
         return self.inX, self.outY
+
+
+# Setting the DBN default value.
+class SetDBN(object):
+
+    def __init__(self,inputs,outputs,learningRate,
+                 momentum,pre_epoch,fine_epoch,
+                 hiddenUnits,W=None,b=None):
+        self.inputs = inputs
+        self.outputs = outputs
+        self.lr = learningRate if learningRate is not None else 0.01
+        self.momentum = momentum
+        self.pre_epoch = pre_epoch
+        self.fine_epoch = fine_epoch
+        self.hiddenUnits = hiddenUnits
+        self.W = W
+        self.b = b
+
+        # check inputs and outputs
+        assert len(self.inputs) and len(self.outputs) > 0
+
+        #  initial weight and bias
+        self.addrange = 0.1
+
+    def epochs(self):
+        return self.pre_epoch, self.fine_epoch, self.lr
+
+
+    def floatX(self,value):
+        changed_value = np.asarray(value, dtype=theano.config.floatX)
+        return changed_value
+
+    def genHiddenBox(self):
+
+        inputNum = self.inputs.shape[1]
+        outputNum = self.outputs.shape[1]
+        hiddenBox = inputNum
+        for iter in self.hiddenUnits:
+            hiddenBox = np.append(hiddenBox,iter)
+
+        hiddenBox= np.append(hiddenBox,outputNum)
+        return hiddenBox
+
+
+    def genWeight(self):
+
+        hid = self.genHiddenBox()
+        weightMatrix = []
+        for layer in range(len(hid)-1):
+
+            seed = np.random.randint(100,999)
+            self.genRan = np.random.RandomState(seed)
+            weight = self.genRan.rand(hid[layer],hid[layer+1]) * self.addrange * 2 - self.addrange
+            weightMatrix.append(weight)
+
+        return weightMatrix
+
+    def genBias(self):
+
+        hid = self.genHiddenBox()
+        biasMatrix = []
+        for layer in hid:
+
+            if layer < 2:
+                biasInit = 1
+            else:
+                biasInit = np.log10((1.0/layer) / (1.0-(1.0/layer)))
+
+            bias = np.array([np.tile(biasInit,layer)])
+            biasMatrix.append(bias)
+
+        return biasMatrix
+
+    # Generate symbolic matrices.
+    def genMatrices(self):
+        self.inX = T.matrix('inputs')
+        self.outY = T.matrix('outputs')
+        return self.inX, self.outY
+
+    # generate shared variables.
+    def sharing(self,weightMatrix,biasMatrix):
+
+        weightBox = []
+        biasBox = []
+        for w in weightMatrix:
+            weight = theano.shared(self.floatX(w))
+            weightBox.append(weight)
+
+        for b in biasMatrix:
+            bias = theano.shared(self.floatX(b))
+            biasBox.append(bias)
+
+        return weightBox, biasBox
+
+
+
+
+
+

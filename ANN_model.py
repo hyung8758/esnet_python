@@ -14,7 +14,7 @@ Please refer to the step as follows.
                                                                                 2016. 02. 07
                                                                                     EMCS Lab
 '''
-
+import numpy as np
 import theano.tensor as T
 
 class ANN_model(object):
@@ -65,3 +65,19 @@ class ANN_model(object):
         for p, g in zip(params, gradient):
             updates.append([p, p - g * self.lr])
         return cost, updates
+
+    # for calculate MSE and correlation coefficients
+    def MSE(self,target_y,hat_y,batch_num):
+
+        hat_out = np.concatenate(hat_y,axis=0)
+        hat_line = np.concatenate(hat_out,axis=0)
+        target_out = target_y[0:len(target_y)-batch_num]
+        target_line = np.concatenate(target_out,axis=0)
+
+        # MSE
+        mse = np.sum((target_line - hat_line)**2)/(len(target_y)*2)
+
+        # Correlation coefficients
+        cor_coefficients = np.corrcoef(hat_line,target_line)[0,1]
+        return mse, cor_coefficients
+
