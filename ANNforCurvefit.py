@@ -32,7 +32,7 @@ from NetworkModel import ANN_model
 
 def anncurvefit_train():
 
-    print 'Loading the data...'
+    print 'Loading the data and setting default values...'
 
     # Import mfcc data
     train_in, train_out, test_in, test_out = loadfile.readartmfcc()
@@ -43,15 +43,15 @@ def anncurvefit_train():
     # Import building (optional)
     #train_in, train_out, test_in, test_out = loadfile.readbuilding()
 
-    print 'Assigning the data variables...'
+    print 'Constructing the hidden layers...'
 
     # Generate initial values.
     values = SetANN(inputs=train_in,
                        outputs=train_out,
                        learningRate=0.001,
                        momentum=0.9,
-                       epochNum=30,
-                       hiddenUnits=50,
+                       epochNum=50,
+                       hiddenUnits=10,
                        W=None,
                        b=None)
     ihMatrix,hoMatrix = values.genWeight()

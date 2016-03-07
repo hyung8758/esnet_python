@@ -32,7 +32,7 @@ from NetworkModel import ANN_model
 
 def annclass_train():
 
-    print 'Loading the data...'
+    print 'Loading the data and setting default values...'
 
 
     # Import MNIST (optional)
@@ -41,7 +41,7 @@ def annclass_train():
     # Import cancerData
     #train_in, train_out, test_in, test_out = loadfile.readcancer()
 
-    print 'Assigning the data variables...'
+    print 'Constructing the hidden layers...'
 
     # Generate initial values.
     values = SetANN(inputs=train_in,
@@ -107,7 +107,7 @@ def annclass_train():
     accuracy = np.mean(np.argmax(test_out,axis=1) == predict(test_in))
     print '\nTesting completed. Testing Result is as follows\nAccuracy: {} percent'.format(round(accuracy*100,2))
 
-    print '\nprocess finished.'
+    print'ANN learning procedure has been completed.'
 
 if __name__ == '__main__':
     annclass_train()

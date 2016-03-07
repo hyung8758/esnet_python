@@ -50,7 +50,7 @@ def dbncurvefit_train():
     #train_in, train_out, test_in, test_out = loadfile.readbuilding()
 
 
-    print 'Structuring the hidden layers...'
+    print 'Constructing the hidden layers...'
 
     # Setting default values by using  SetValues.
     hiddenStructure = np.array([50,50,50])
@@ -58,8 +58,8 @@ def dbncurvefit_train():
                     outputs=train_out,
                     learningRate=0.01,
                     momentum=0.9,
-                    pre_epoch=50,
-                    fine_epoch=50,
+                    pre_epoch=10,
+                    fine_epoch=30,
                     hiddenUnits=hiddenStructure,
                     W=None,
                     b=None)
@@ -142,7 +142,7 @@ def dbncurvefit_train():
     weightMatrix, biasMatrix = values.sharing(weightMatrix,biasMatrix)
 
 
-    print 'Pre_training completed. Prepare for fine_turning...'
+    print 'Pre_training completed.'
 
 
 ################################
@@ -170,7 +170,7 @@ def dbncurvefit_train():
 
     print 'Training the data...'
 
-    error_epoch = 10
+    error_epoch = 5
     total_epoch = fine_epoch
     for epoch in range(total_epoch):
 
@@ -213,14 +213,14 @@ def dbncurvefit_train():
     # Calculating MSE and correlation coefficients
     MSE = et.MSE(test_out,test_error_history)
     cor_coef = et.pearsonR(test_out,test_error_history)
-    print 'Testing completed.\nTesting Result is as follows...\nMSE: {}\nCorrelation coefficients: {}'\
-                                                                        .format(round(MSE,3),round(cor_coef,3))
+    print 'Testing completed.\nTesting Result is as follows\nMSE          : {}\nCorrelation r: {}'\
+                                                                        .format(round(MSE,2),round(cor_coef,3))
 
     # Plotting correlation data
-    print 'Displaying correlation graph...\n The plot will be displayed in a moment.'
+    print 'Displaying correlation graph'
     et.correlationplot(test_out,test_error_history)
 
-    print'ANN learning procedure has been completed.'
+    print'DBN learning procedure has been completed.'
 
 
 if __name__ == '__main__':

@@ -158,7 +158,7 @@ def dbnclass_train():
                    biasMatrix=biasMatrix,
                    learningRate=0.001)
 
-    outputStorage, outputActivation = models.fnn(methods='curvefitting')
+    outputStorage, outputActivation = models.fnn(methods='classification')
     cost, updates = models.sgd2(outputStorage)
 
     # Train and Predict function.
@@ -168,7 +168,7 @@ def dbnclass_train():
 
     print 'Training the data...'
 
-    error_epoch = 10
+    error_epoch = 5
     total_epoch = fine_epoch
     for epoch in range(total_epoch):
 
@@ -199,15 +199,20 @@ def dbnclass_train():
 ###############################
 
     # Testing the trained model and its accuracy.
-
+    accuracy_history = []
     # accuracy bug needs to be solved.
-    accuracy = np.mean(np.argmax(test_out,axis=1) == predict(test_in))
-    print '\nTesting completed. Testing Result is as follows\nAccuracy: {} percent'.format(round(accuracy*100,2))
+    for test_batch_in,test_batch_out in zip(range(test_in.shape[0]),range(1,test_in.shape[0]+1)):
+
+        accuracy = np.mean(np.argmax(test_out[test_batch_in:test_batch_out],axis=1) == predict(test_in[test_batch_in:test_batch_out]))
+        accuracy_history.append(accuracy)
+
+    accuracy_sum = np.mean(accuracy_history)
+    print '\nTesting completed. Testing Result is as follows\nAccuracy: {} percent'.format(round(accuracy_sum*100,2))
 
     # Confusion plot (update soon)
 
 
-    print'ANN learning procedure has been completed.'
+    print'DBN learning procedure has been completed.'
 
 
 if __name__ == '__main__':
