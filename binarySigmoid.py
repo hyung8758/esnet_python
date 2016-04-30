@@ -9,7 +9,4 @@ This sigmoid function decays the values by multiplying momentum.
 import numpy as np
 
 def binarySigmoid(momentum,X):
-
-    Y = 1.0/(1.0 + np.exp(momentum * -X))
-
-    return Y
+    return 1.0/(1.0 + np.exp(momentum * -X))

@@ -4,7 +4,7 @@ For setting default values of ANN and DBN.
 
                                                                     Written by Hyungwon Yang
                                                                                 2016. 02. 10
-                                                                                    EMCS Lab
+                                                                                   EMCS Labs
 '''
 
 import numpy as np
@@ -68,17 +68,19 @@ class SetANN(object):
 
 
 # Setting the DBN default value.
-class SetDBN(object):
+class SetDNN(object):
 
-    def __init__(self,inputs,outputs,learningRate,
-                 momentum,pre_epoch,fine_epoch,
+    def __init__(self,inputData,targetData,fineLearningRate,preLearningRate,
+                 batchSize,momentum,preTrainEpoch,fineTrainEpoch,
                  hiddenUnits,W=None,b=None):
-        self.inputs = inputs
-        self.outputs = outputs
-        self.lr = learningRate if learningRate is not None else 0.01
+        self.inputs = inputData
+        self.outputs = targetData
+        self.finelr = fineLearningRate if fineLearningRate is not None else 0.01
+        self.prelr = preLearningRate if preLearningRate is not None else 0.01
+        self.batchSize = batchSize
         self.momentum = momentum
-        self.pre_epoch = pre_epoch
-        self.fine_epoch = fine_epoch
+        self.pre_epoch = preTrainEpoch
+        self.fine_epoch = fineTrainEpoch
         self.hiddenUnits = hiddenUnits
         self.W = W
         self.b = b
@@ -90,7 +92,10 @@ class SetDBN(object):
         self.addrange = 0.1
 
     def epochs(self):
-        return self.pre_epoch, self.fine_epoch, self.lr
+        return self.pre_epoch, self.fine_epoch
+
+    def params(self):
+        return self.finelr, self.prelr, self.momentum, self.batchSize
 
 
     def floatX(self,value):
@@ -159,7 +164,34 @@ class SetDBN(object):
 
         return weightBox, biasBox
 
+def shakeBatch(inputNumber,batchSize,option):
 
+    # Get batchNumber
+    if np.remainder(inputNumber,batchSize) is 0:
+        batchNumber = (inputNumber/batchSize)
+    else:
+        batchNumber = (inputNumber/batchSize) + 1
+
+    # Check option
+    if option is 'train':
+        batchBox = np.random.permutation(inputNumber)
+    elif option is 'test':
+        batchBox = range(inputNumber)
+    else:
+        raise Exception('Option variable of shakeBatch function is inapplicable. It should be train or test.')
+
+    start = -1
+    final = -1
+    batchIndex = []
+    for run in range(batchNumber):
+
+        start = final + 1
+        final = final + batchSize
+        if final > inputNumber:
+            final -= final - inputNumber
+        batchIndex.append(batchBox[start:final+1])
+
+    return batchIndex[0:-1]
 
 
 

@@ -39,8 +39,8 @@ def readbody():
 	test_out = bodyfatTargets[200:253]
 	test_in = bodyfatInputs[200:253]
 
-	print 'Data Information'
-	print 'Train data: 200 examples, Test data: 52 examples\nInputs: 13 features, Outputs: 1 feature\n'
+	print('Data Information')
+	print('Train data: 200 examples, Test data: 52 examples\nInputs: 13 features, Outputs: 1 feature\n')
 	return train_in, train_out, test_in, test_out
 
 # Import buildingData
@@ -56,8 +56,8 @@ def readbuilding():
 	test_out = buildingTargets[3400:4209]
 	test_in = buildingTargets[3400:4209]
 
-	print 'Data Information'
-	print 'Train data: 3,400 examples, Test data: 808 examples\nInputs: 14 features, Outputs: 3 features\n'
+	print('Data Information')
+	print('Train data: 3,400 examples, Test data: 808 examples\nInputs: 14 features, Outputs: 3 features\n')
 	return train_in, train_out, test_in, test_out
 
 # Import art_mfcc Data
@@ -74,8 +74,8 @@ def readartmfcc():
 	test_out = art_V[12000:16001]
 	test_in = mfcc_V[12000:16001]
 
-	print 'Data Information'
-	print 'Train data: 12,000 examples, Test data: 4,000 examples\nInputs: 39 features, Outputs: 16 features(x&y pairs, total 8 pallet locations)\n'
+	print('Data Information')
+	print('Train data: 12,000 examples, Test data: 4,000 examples\nInputs: 39 features, Outputs: 16 features(x&y pairs, total 8 pallet locations)\n')
 	return train_in, train_out, test_in, test_out
 
 
@@ -123,8 +123,8 @@ def readmnist(ntrain=60000,ntest=10000,onehot=True):
 		train_y = np.asarray(trY)
 		test_y = np.asarray(teY)
 
-	print 'Data Information'
-	print 'Train data:60,000 examples, Test data: 10,000 examples\nInputs: 784 features, Outputs: 10 classification(0-9 digits)\n'
+	print('Data Information')
+	print('Train data:60,000 examples, Test data: 10,000 examples\nInputs: 784 features, Outputs: 10 classification(0-9 digits)\n')
 	return train_x, train_y, test_x, test_y
 
 # Import cancerData
@@ -143,6 +143,6 @@ def readcancer():
 	test_in = inputs[:,550:701].transpose()
 	test_out = outputs[:,550:701].transpose()
 
-	print 'Data Information'
-	print 'Train data: 550 examples, Test data: 150 examples\nInputs: 9 features, Outputs: 2 classification(cancer or not)\n'
+	print('Data Information')
+	print('Train data: 550 examples, Test data: 150 examples\nInputs: 9 features, Outputs: 2 classification(cancer or not)\n')
 	return train_in, train_out, test_in, test_out

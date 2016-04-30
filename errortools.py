@@ -4,7 +4,7 @@ Errortools for calculating the errors of your networks and visualizing the resul
 
                                                                     Written by Hyungwon Yang
                                                                                 2016. 02. 25
-                                                                                    EMCS Lab
+                                                                                   EMCS Labs
 """
 
 '''
@@ -60,5 +60,6 @@ def correlationplot(target_y,hat_y):
     plt.ylim(target_line.min()-limspace,target_line.max()+limspace)
     plt.show()
 
-# confusion plot for classification problem
-# 만드시오... right now!!
+# confusion plot for classification problem (needs to be made...)
+
+
