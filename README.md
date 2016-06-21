@@ -7,7 +7,7 @@ Machine learning toolbox based on Python and Theano.
 
 
 
-Linux and MacOSX (This script is not tested on Window)
+Linux and MacOSX (This script is not tested on Windows)
 ---
 
 ~~python 2.7~~ (Python 2.7 was used to be supported but not anymore.)
