@@ -1,4 +1,4 @@
-# This is HY_python_NN.
+# This is HY_python_NN. (developer version)
                                                               Hyungwon Yang
                                                                  2015.02.02
                                                                    EMCS lab
