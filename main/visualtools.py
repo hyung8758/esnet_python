@@ -15,6 +15,7 @@ Errortools for calculating the errors of your networks and visualizing the resul
 
 '''
 import numpy as np
+import tensorflow as tf
 import matplotlib.pyplot as plt
 
 # Calculating Mean Sequare Error
@@ -61,5 +62,18 @@ def correlationplot(target_y,hat_y):
     plt.show()
 
 # confusion plot for classification problem (needs to be made...)
+def printvar(variable, echo='on'):
 
+    plot_init = tf.global_variables_initializer()
 
+    # run the graph.
+    with tf.Session() as sess:
+        sess.run(plot_init)  # execute init_op
+        if echo is 'on':
+            # print the random values that we sample
+            print(sess.run(variable))
+        elif echo is 'off':
+            sess.run(variable)
+        else:
+            print('Wrong option is provided.')
+        return sess.run(variable)
