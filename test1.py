@@ -454,4 +454,808 @@ optim_equ = lambda W: 1/2.*sum((np.dot(equation(X).transpose(),W) - Y))**2
 
 res = minimize(optim_equ,W,method='CG',options={'disp':True})
 optimal_W = res.x
+
+
+
+
+# Download MNIST dataset.
+import loadfile
+
+# mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+
+### Train
+# import tensorflow as named tf for easy usage.
+import tensorflow as tf
+import main.loadfile as lf
+import main.SetValues as sv
+import numpy as np
+
+train_in, train_out, test_in, test_out = lf.readmnist()
+# Set x as an input variable. None means it can have any dimension vector.
+x = tf.placeholder(tf.float32, [None, 784])
+
+# Set weight and bias
+W = tf.Variable(tf.zeros([784, 10]))
+b = tf.Variable(tf.zeros([10]))
+
+# input to output.
+y = tf.nn.softmax(tf.matmul(x, W) + b)
+
+# Set cross entropy.
+y_ = tf.placeholder(tf.float32, [None, 10])
+cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+
+# Set the train procedure.
+train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+
+# ready to train.
+init = tf.initialize_all_variables()
+
+# Run the train procedure.
+sess = tf.Session()
+sess.run(init)
+
+batchSize=100
+start=0
+last=1
+for i in range(100):
+
+    # for start, last in zip(range(0, len(test_in), batchSize), range(100, len(test_out), batchSize)):
+
+    batch_xs = train_in[start:last*100]
+    batch_ys = train_out[start:last*100]
+    start+=batchSize
+    last+=i
+    # perm = np.random.permutation(batchSize)
+    # batch_xs = [batch_xs[i] for i in perm]
+    # batch_ys= [batch_ys[i] for i in perm]
+    _, loss = sess.run([train_step, cross_entropy], feed_dict={x: batch_xs, y_: batch_ys})
+    print(str(i) + 'th loss: ' + str(loss))
+
+
+### Evaluation
+correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+
+# Check accuracy.
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+print(sess.run(accuracy, feed_dict={x: test_in, y_: test_out}))
+
+######
+
+import tensorflow as tf
+
+#define a variable to hold normal random values
+normal_rv = tf.Variable( tf.truncated_normal([2,3],stddev = 0.1))
+
+#initialize the variable
+init_op = tf.global_variables_initializer()
+
+#run the graph
+with tf.Session() as sess:
+    sess.run(init_op) #execute init_op
+    #print the random values that we sample
+    print (sess.run(weightMatrix[0]))
+
+
+
+import main.loadfile as lf
+import numpy as np
+import tensorflow as tf
+import main.visualtools as vt
+import main.setvalues as set
+import main.networkmodels as net
+# classification.
+training = 'on';testing = 'on';fineTrainEpoch = 10;fineLearningRate = 0.01;batchSize = 100;normalize = 'off';hiddenLayers = [50,50];problem = 'classification' ;hiddenFunction= 'sigmoid'
+costFunction = 'adam' ;plotOption = 'off';preTrainEpoch = 10;preLearningRate = 0.1;error_epoch = 5;inputData, targetData, test_in, test_out = lf.readmnist();RBM_values = set.setParam(inputData=inputData,targetData=targetData,hiddenUnits=hiddenLayers)
+# Setting hidden layers: weightMatrix and biasMatrix
+rbm_weightMatrix = RBM_values.genWeight()
+rbm_biasMatrix = RBM_values.genBias()
+rbm_input_x, rbm_input_y = RBM_values.genSymbol()
+rbm = net.RBMmodel(inputSymbol=rbm_input_x,
+                   preTrainEpoch=preTrainEpoch,
+                   preLearningRate=preLearningRate,
+                   weightMatrix=rbm_weightMatrix,
+                   biasMatrix=rbm_biasMatrix,
+                   batchSize=batchSize)
+rbm.genRBM()
+rbm.trainRBM(inputData)
+
+
+rbm_vars = rbm.getVariables()
+
+
+# LSTM test.
+import _pickle as pickle
+import main.loadfile as lf
+import numpy as np
+import tensorflow as tf
+import main.visualtools as vt
+import main.setvalues as set
+import main.networkmodels as net
+# classification.
+training = 'on'
+testing = 'on'
+fineTrainEpoch = 10
+fineLearningRate = 0.001
+learningRateDecay = 'off' # on, off
+batchSize = 100
+normalize = 'off'
+hiddenLayers = [100]
+hiddenNumber = 2
+problem = 'classification' # classification, regression
+hiddenFunction= 'sigmoid'
+costFunction = 'adam' # gradient, adam
+plotOption = 'off'
+preTrainEpoch = 10 # rbm epoch.
+preLearningRate = 0.01 # rbm learning rate.
+from __future__ import print_function
+
+import tensorflow as tf
+from tensorflow.contrib import rnn
+
+# Import MNIST data
+# from tensorflow.examples.tutorials.mnist import input_data
+# mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+
+# Parameters
+learning_rate = 0.001
+training_iters = 100000
+batchSize = 100
+display_step = 10
+
+# Network Parameters
+inputDim = 39 # mfcc features
+timeStep = 17 # timesteps
+n_hidden = batchSize # hidden layer num of features
+n_classes = 14 #
+
+# inputData, targetData, test_in, test_out = lf.readmnist()
+# mfcc: regression
+# inputData, targetData, test_in, test_out = lf.readartmfcc()
+# art and mfcc data(from jaegu)
+with open("train_data/new_acoustics_vowel.pckl", "rb") as f:
+    acoustics = pickle.load(f)
+with open("train_data/new_articulation_vowel.pckl", "rb") as f:
+    articulations = pickle.load(f)
+
+
+print('Setting default parameters...')
+# Setting default values by using SetValues.
+lstm_values = set.setParam(inputData=acoustics,
+                          targetData=articulations,
+                          hiddenUnits=hiddenLayers
+                          )
+
+# Setting hidden layers: weightMatrix and biasMatrix
+# lstm_weightMatrix = lstm_values.genWeight(option='random_normal')
+# lstm_biasMatrix = lstm_values.genBias(option='random_normal')
+# input_x = tf.placeholder("float", [None, inputDim, timeStep])
+# input_y = tf.placeholder("float", [None, n_classes])
+input_x = tf.placeholder(tf.float32,[batchSize,39])
+
+
+
+# def RNN(inputs, weights, biases):
+def genRNN(input_x,weight,bias):
+
+    input = tf.transpose(input_x,[1,0,2])
+    input = tf.reshape(input,[-1,inputDim])
+    split_input = tf.split(input,timeStep,0)
+
+    lstm_cell = rnn.BasicLSTMCell(hiddenLayers)
+    rnn_cell = rnn.MultiRNNCell([lstm_cell] * hiddenNumber)
+    initial_state = rnn_cell.zero_state(batchSize,tf.float32)
+
+    output,state = tf.nn.dynamic_rnn(lstm_cell, split_input, initial_state=initial_state)
+
+
+tmp = acoustics[0:100]
+tmp = tf.transpose(tmp, [1, 0, 2])
+# Reshaping to (n_steps*batch_size, n_input)
+tmp = tf.reshape(tmp, [-1, inputDim])
+# Split to get a list of 'n_steps' tensors of shape (batch_size, n_input)
+split_inputs = tf.split(tmp, stepNumber, 0)
+
+lstm_cell = rnn.BasicLSTMCell(hiddenLayers)
+
+rnn_cell = rnn.MultiRNNCell([lstm_cell] * hiddenNumber)
+
+state = lstm_cell.zero_state(batchSize,tf.float32)
+
+
+
+# output, layers = tf.nn.dynamic_rnn(lstm_cell, split_inputs, [100], dtype=tf.float32)
+
+# outputs, states = rnn.static_rnn(lstm_cell, input_x, dtype=tf.float32)
+
+# Define a lstm cell with tensorflow
+lstm_cell = rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
+
+# Get lstm cell output
+outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+
+# Linear activation, using rnn inner loop last output
+# return tf.matmul(outputs[-1], weights['out']) + biases['out']
+tf.matmul(outputs[-1], weights['out']) + biases['out']
+
+# pred = RNN(x, weights, biases)
+
+# Define loss and optimizer
+cost = tf.reduce_mean(tf.square(pred - y))
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+# Evaluate model
+correct_pred = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
+accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+# Initializing the variables
+init = tf.global_variables_initializer()
+
+# Launch the graph
+with tf.Session() as sess:
+    sess.run(init)
+    step = 1
+    # Keep training until reach max iterations
+    while step * batchSize < training_iters:
+        for start, last in zip(range(0, acoustics.shape[0], batchSize),
+                               range(batchSize, acoustics.shape[0], batchSize)):
+        batch_x = acoustics[start:last]
+        batch_y = articulation[start:last]
+        # Reshape data to get 28 seq of 28 elements
+        batch_x = batch_x.reshape((batchSize, n_steps, n_input))
+        # Run optimization op (backprop)
+        sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
+        if step % display_step == 0:
+            # Calculate batch accuracy
+            acc = sess.run(accuracy, feed_dict={x: batch_x, y: batch_y})
+            # Calculate batch loss
+            loss = sess.run(cost, feed_dict={x: batch_x, y: batch_y})
+            print("Iter " + str(step*batchSize) + ", Minibatch Loss= " + \
+                  "{:.6f}".format(loss) + ", Training Accuracy= " + \
+                  "{:.5f}".format(acc))
+        step += 1
+    print("Optimization Finished!")
+
+    # Calculate accuracy for 128 mnist test images
+    test_len = 128
+    test_data = mnist.test.images[:test_len].reshape((-1, n_steps, n_input))
+    test_label = mnist.test.labels[:test_len]
+    print("Testing Accuracy:", \
+        sess.run(accuracy, feed_dict={x: test_data, y: test_label}))
+
+
+
+# #####
+# max_Cycle = 100
+# pattern_Count = 24023
+#
+# acoustics_Pattern = np.zeros((max_Cycle, pattern_Count, 39)).astype("float32")
+# for index in range(len(acou)):
+#     pattern = acou[index][:, 0:max_Cycle] # For test
+#     # pattern = acou[index];
+#     acoustics_Pattern[0:pattern.shape[1], index, :] = np.transpose(pattern)
+#
+# import matplotlib.pyplot as plt
+# now_val = 0
+# six_val = 0
+# seven_val = 0
+# record = np.array([0])
+# for value in acoustics:
+#     record = np.vstack((record, value.shape[1]))
+#     if value.shape[1] == 16:
+#         six_val += 1
+#     elif value.shape[1] == 17:
+#         seven_val += 1
+#     if value.shape[1] > now_val:
+#         now_val = value.shape[1]
+#         best_val = now_val
+# new_record = np.squeeze(record)
+# plt.hist(new_record,30,range=[0,100])
+# plt.hist(new_record,30,range=[0,50])
+# plt.xticks(range(0,36,1))
+# plt.xlabel("The length of time steps for each data.")
+# plt.ylabel("The number of datasets")
+
+
+
+
+# box = np.zeros([acoustics[0].shape[0],acoustics[0].shape[1]])
+# for i in acoustics:
+#     box = np.vstack((box,i))
+
+
+# # data transformation
+# # LSTM test.
+# import _pickle as pickle
+# import numpy as np
+#
+# with open("train_data/acoustics_vowel.pckl", "rb") as f:
+#     acoustics = pickle.load(f)
+# with open("train_data/articulation_vowel.pckl", "rb") as f:
+#     articulation = pickle.load(f)
+#
+# new_acoustics = []
+# new_articulation = []
+#
+# for aco_list,art_list in zip(acoustics,articulation):
+#     step = aco_list.shape[1]
+#     aco_item = aco_list.transpose()
+#     art_item = art_list.transpose()
+#     if step < 7 or step > 17:
+#         pass
+#         # new_acoustics.append(aco_item)
+#         # new_articulation.append(art_item)
+#     else:
+#         if step != 17:
+#             for turn in range(17-step):
+#                 aco_item = np.vstack((aco_item,aco_item[-1]))
+#                 art_item = np.vstack((art_item,art_item[-1]))
+#         new_acoustics.append(aco_item)
+#         new_articulation.append(art_item)
+#
+# pickle.dump(new_acoustics,open('new_acoustics.pckl','wb'))
+# pickle.dump(new_articulation,open('new_articulation.pckl','wb'))
+
+
+from __future__ import print_function
+import _pickle as pickle
+import numpy as np
+import tensorflow as tf
+from tensorflow.contrib import rnn
+
+
+# Import MNIST data
+# from tensorflow.examples.tutorials.mnist import input_data
+# mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+
+with open("train_data/new_acoustics_vowel.pckl", "rb") as f:
+    acoustics = pickle.load(f)
+with open("train_data/new_articulations_vowel.pckl", "rb") as f:
+    articulations = pickle.load(f)
+
+
+# To classify images using a recurrent neural network, we consider every image
+# row as a sequence of pixels. Because MNIST image shape is 28*28px, we will then
+# handle 28 sequences of 28 steps for every sample.
+
+def sigmoid(data):
+    return 1 / (1 + np.exp(-0.25 * data))
+
+# Parameters
+learning_rate = 0.001
+training_iters = 100000
+batch_size = 100
+display_step = 10
+
+# Network Parameters
+n_input = 39 # MNIST data input (img shape: 28*28)
+n_steps = 17 # timesteps
+n_hidden = 200 # hidden layer num of features
+n_classes = 14 # MNIST total classes (0-9 digits)
+
+# Define weights
+weights = {
+    'out': tf.Variable(tf.random_normal([n_hidden, n_classes]))
+}
+biases = {
+    'out': tf.Variable(tf.random_normal([n_classes]))
+}
+
+input_x = tf.placeholder(tf.float32,[None,n_steps,n_input])
+input_y = tf.placeholder(tf.float32,[None,n_steps,n_classes])
+
+# Define a lstm cell with tensorflow
+lstm_cell = rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
+
+# Get lstm cell output
+outputs, states = tf.nn.dynamic_rnn(lstm_cell, input_x, dtype=tf.float32)
+
+pred_val = tf.matmul(outputs[-1], weights['out']) + biases['out']
+
+# Define loss and optimizer
+cost = tf.reduce_mean(tf.square(pred_val-input_y))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+# Evaluate model
+# correct_pred = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
+# accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+# Initializing the variables
+init = tf.global_variables_initializer()
+
+# Launch the graph
+with tf.Session() as sess:
+    sess.run(init)
+    step = 1
+    # Keep training until reach max iterations
+    start=0
+    last=batch_size
+    while step * batch_size < training_iters:
+        batch_x = acoustics[start:last]
+        batch_y = articulations[start:last]
+        # Run optimization op (backprop)
+        sess.run(optimizer, feed_dict={input_x: batch_x, input_y: batch_y})
+        if step % display_step == 0:
+            # Calculate batch accuracy
+            # acc = sess.run(accuracy, feed_dict={x: batch_x, y: batch_y})
+            # Calculate batch loss
+            loss = sess.run(cost, feed_dict={input_x: batch_x, input_y: batch_y})
+            print("Iter " + str(step*batch_size) + ", Minibatch Loss= " + \
+                  "{:.6f}".format(loss) )
+        step += 1
+    print("Optimization Finished!")
+
+    # Calculate accuracy for 128 mnist test images
+    test_len = 128
+    test_input = acoustics[0:1000]
+    test_output = articulations[0:1000]
+    print("Testing Accuracy:", \
+        sess.run(cost, feed_dict={input_x: test_input, input_y: test_output}))
+
+
+
+
+### Simple LSTM
+import _pickle as pickle
+import main.setvalues as set
+import main.datatool as dt
+import main.lstmnetworkmodels as net
+
+# regression
+trainEpoch = 1
+learningRate = 0.0001
+learningRateDecay = 'off' # on, off
+batchSize = 100
+normalize = 'off'
+hiddenLayers = [200]
+hiddenNumber = 1
+timeStep = 17
+problem = 'regression' # classification, regression
+costFunction = 'adam' # gradient, adam
+plotOption = 'off'
+
+# Import data
+# new_acoustics_vowel and new_articulation_vowel
+with open("train_data/new_acoustics_vowel.pckl", "rb") as f:
+    acoustics = pickle.load(f)
+    # acoustics = dt.momentumSigmoid(acoustics,0.25)
+    train_input = acoustics[0:18000]
+    test_input = acoustics[18000:20001]
+with open("train_data/new_articulations_vowel.pckl", "rb") as f:
+    articulations = pickle.load(f)
+    # articulations = dt.momentumSigmoid(articulations,0.1)
+    train_output = articulations[0:18000]
+    test_output = articulations[18000:20001]
+
+# with open("train_data/acoustics.pckl", "rb") as f:
+#     acoustics = pickle.load(f)
+# with open("train_data/articulation.pckl", "rb") as f:
+#     articulations = pickle.load(f)
+
+lstm_values = set.simpleLSTMParam(inputData=train_input,
+                           targetData=train_output,
+                           timeStep=timeStep,
+                           hiddenUnits=hiddenLayers
+                           )
+
+# Setting hidden layers: weightMatrix and biasMatrix
+lstm_weightMatrix = lstm_values.genWeight()
+lstm_biasMatrix = lstm_values.genBias()
+lstm_input_x,lstm_input_y = lstm_values.genSymbol()
+
+lstm_net = net.simpleLSTMmodel(inputSymbol=lstm_input_x,
+                               outputSymbol=lstm_input_y,
+                               trainEpoch=trainEpoch,
+                               learningRate=learningRate,
+                               timeStep=timeStep,
+                               batchSize=batchSize,
+                               weightMatrix=lstm_weightMatrix,
+                               biasMatrix=lstm_biasMatrix)
+
+lstm_net.genLSTM()
+
+lstm_net.trainLSTM(train_input,train_output)
+
+lstm_net.testLSTM(test_input,test_output)
+
+vars = lstm_net.getVariables()
+
+lstm_net.closeLSTM()
+
+
+
+
+### LSTM
+import _pickle as pickle
+import numpy as np
+import main.setvalues as set
+import main.datatool as dt
+import main.lstmnetworkmodels as net
+
+# regression
+trainEpoch = 50
+learningRate = 0.0001
+learningRateDecay = 'off' # on, off
+batchSize = 10
+normalize = 'off'
+hiddenLayers = [200]
+hiddenNumber = 1
+timeStep = 17
+problem = 'regression' # classification, regression
+costFunction = 'adam' # gradient, adam
+plotOption = 'off'
+
+
+# Import data
+with open("train_data/new_acoustics_vowel.pckl", "rb") as f:
+    acoustics = pickle.load(f)
+    acoustics = dt.momentumSigmoid(acoustics,0.25)
+with open("train_data/new_articulations_vowel.pckl", "rb") as f:
+    articulations = pickle.load(f)
+
+
+# Get lstm parameters.
+lstm_values = set.LSTMParam(inputData=acoustics,
+                           targetData=articulations,
+                           timeStep=timeStep,
+                           hiddenUnits=hiddenLayers
+                           )
+
+# Setting hidden layers: weightMatrix and biasMatrix
+lstm_weightMatrix = lstm_values.genWeight()
+lstm_biasMatrix = lstm_values.genBias()
+lstm_input_x,lstm_input_y = lstm_values.genSymbol()
+
+
+lstm_net = net.simpleLSTMmodel(inputSymbol=lstm_input_x,
+                               outputSymbol=lstm_input_y,
+                               trainEpoch=trainEpoch,
+                               learningRate=learningRate,
+                               timeStep=timeStep,
+                               batchSize=batchSize,
+                               weightMatrix=lstm_weightMatrix,
+                               biasMatrix=lstm_biasMatrix)
+
+lstm_net.genLSTM()
+
+lstm_net.trainLSTM(acoustics,articulations)
+
+lstm_net.testLSTM()
+
+lstm_net.closeLSTM()
+
+## lstm example with tensorflow
+import numpy as np
+from random import shuffle
+import tensorflow as tf
+import tensorflow.contrib.rnn as rnn
+
+# generate input
+train_input = ['{0:020b}'.format(i) for i in range(2 ** 20)]
+shuffle(train_input)
+train_input = [map(int, i) for i in train_input]
+ti = []
+for i in train_input:
+    temp_list = []
+    for j in i:
+        temp_list.append([j])
+    ti.append(np.array(temp_list))
+train_input = ti
+
+# generate output
+train_output = []
+for i in train_input:
+    count = 0
+    for j in i:
+        if j[0] == 1:
+            count += 1
+    temp_list = ([0] * 21)
+    temp_list[count] = 1
+    train_output.append(temp_list)
+
+# generate test data
+NUM_EXAMPLES = 10000
+test_input = train_input[NUM_EXAMPLES:]
+test_output = train_output[NUM_EXAMPLES:]  # everything beyond 10,000
+
+train_input = train_input[:NUM_EXAMPLES]
+train_output = train_output[:NUM_EXAMPLES]  # till 10,000
+
+data = tf.placeholder(tf.float32, [None, 20,1])
+target = tf.placeholder(tf.float32, [None, 21])
+
+num_hidden = 24
+cell = rnn.BasicLSTMCell(num_hidden,state_is_tuple=True)
+
+val, state = tf.nn.dynamic_rnn(cell, data, dtype=tf.float32)
+
+val = tf.transpose(val, [1, 0, 2])
+last = tf.gather(val, int(val.get_shape()[0]) - 1)
+
+###### jk recipe
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Input/Ouput data
+char_raw = 'hello_world_good_morning_see_you_hello_great'
+char_list = list(set(char_raw))
+char_to_idx = {c: i for i, c in enumerate(char_list)}
+idx_to_char = {i: c for i, c in enumerate(char_list)}
+char_data = [char_to_idx[c] for c in char_raw]
+char_data_one_hot = tf.one_hot(char_data, depth=len(
+    char_list), on_value=1., off_value=0., axis=1, dtype=tf.float32)
+char_input = char_data_one_hot[:-1, :]  # 'hello_world_good_morning_see_you_hello_grea'
+char_output = char_data_one_hot[1:, :]  # 'ello_world_good_morning_see_you_hello_great'
+with tf.Session() as sess:
+    char_input = char_input.eval()
+    char_output = char_output.eval()
+
+
+# Learning parameters
+learning_rate = 0.001
+max_iter = 200
+
+# Network Parameters
+n_input_dim = char_input.shape[1]
+n_input_len = char_input.shape[0]
+n_output_dim = char_output.shape[1]
+n_output_len = char_output.shape[0]
+n_hidden = 100
+
+# TensorFlow graph
+# (batch_size) x (time_step) x (input_dimension)
+x = tf.placeholder(tf.float32, [10, None, n_input_dim])
+# (batch_size) x (time_step) x (output_dimension)
+y = tf.placeholder(tf.float32, [10, None, n_output_dim])
+
+# Parameters
+weights = {
+    'out': tf.Variable(tf.random_normal([n_hidden, n_output_dim], seed=1))
+}
+biases = {
+    'out': tf.Variable(tf.random_normal([n_output_dim], seed=1))
+}
+
+# RNN-LSTM cell
+def RNN(inputs, weights, biases):
+    # Reshape to (time_step) x (batch_size) x (input_dimension)
+    inputs = tf.transpose(inputs, [1, 0, 2])
+    # Reshape to (time_step)*(batch_size) x (input_dimension)
+    inputs = tf.reshape(inputs, [-1, n_input_dim])
+    # Split to get a list of time_step tensors of shape (batch_size, input_dimension)
+    # final 'inputs' is a list of n_input_len elements
+    # (=number of frames)
+    inputs = tf.split(value=inputs, num_or_size_splits=n_input_len, axis=0)
+
+    lstm = tf.contrib.rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
+    outputs, states = tf.nn.dynamic_rnn(lstm, x, dtype=tf.float32)
+    return tf.matmul(outputs[-1], weights['out']) + biases['out']
+
+def softmax(x):
+    rowmax = np.max(x, axis=1)
+    x -= rowmax.reshape((x.shape[0] ,1)) # for numerical stability
+    x = np.exp(x)
+    sum_x = np.sum(x, axis=1).reshape((x.shape[0],1))
+    return x / sum_x
+
+pred = RNN(x, weights, biases)
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+## learning.
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    train_x = char_input.reshape((1, char_input.shape[0], n_input_dim))
+    train_y = char_output.reshape((1, char_output.shape[0], n_output_dim))
+    for i in range(max_iter):
+        _, loss, p = sess.run([optimizer, cost, pred],
+                              feed_dict={x: train_x, y: train_y})
+        if i is max_iter-1:
+            pred_act = softmax(p)
+        pred_out = np.argmax(p, axis=1)
+        print('Epoch: {:>4}'.format(i + 1), '/', str(max_iter),
+              'Cost: {:4f}'.format(loss), 'Predict:', ''.join([idx_to_char[i] for i in pred_out]))
+        
 '''
+from __future__ import print_function
+
+import tensorflow as tf
+from tensorflow.contrib import rnn
+
+# Import MNIST data
+from tensorflow.examples.tutorials.mnist import input_data
+mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+
+'''
+To classify images using a recurrent neural network, we consider every image
+row as a sequence of pixels. Because MNIST image shape is 28*28px, we will then
+handle 28 sequences of 28 steps for every sample.
+'''
+
+# Parameters
+learning_rate = 0.001
+training_iters = 100000
+batch_size = 128
+display_step = 10
+
+# Network Parameters
+n_input = 28 # MNIST data input (img shape: 28*28)
+n_steps = 28 # timesteps
+n_hidden = 100 # hidden layer num of features
+n_classes = 10 # MNIST total classes (0-9 digits)
+
+# tf Graph input
+x = tf.placeholder("float", [None, n_steps, n_input])
+y = tf.placeholder("float", [None, n_classes])
+
+# Define weights
+weights = {
+    'out': tf.Variable(tf.random_normal([n_hidden, n_classes]))
+}
+biases = {
+    'out': tf.Variable(tf.random_normal([n_classes]))
+}
+
+
+def RNN(x, weights, biases):
+
+    # Prepare data shape to match `rnn` function requirements
+    # Current data input shape: (batch_size, n_steps, n_input)
+    # Required shape: 'n_steps' tensors list of shape (batch_size, n_input)
+
+    # Unstack to get a list of 'n_steps' tensors of shape (batch_size, n_input)
+    x = tf.unstack(x, n_steps, 1)
+
+    # Define a lstm cell with tensorflow
+    lstm_cell = rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
+
+    # Get lstm cell output
+    outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+
+    # Linear activation, using rnn inner loop last output
+    return tf.matmul(outputs[-1], weights['out']) + biases['out']
+
+pred = RNN(x, weights, biases)
+
+# Define loss and optimizer
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+# Evaluate model
+correct_pred = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
+accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+# Initializing the variables
+init = tf.global_variables_initializer()
+
+# Launch the graph
+with tf.Session() as sess:
+    sess.run(init)
+    step = 1
+    # Keep training until reach max iterations
+    while step * batch_size < training_iters:
+        batch_x, batch_y = mnist.train.next_batch(batch_size)
+        # Reshape data to get 28 seq of 28 elements
+        batch_x = batch_x.reshape((batch_size, n_steps, n_input))
+        # Run optimization op (backprop)
+        sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
+        if step % display_step == 0:
+            # Calculate batch accuracy
+            acc = sess.run(accuracy, feed_dict={x: batch_x, y: batch_y})
+            # Calculate batch loss
+            loss = sess.run(cost, feed_dict={x: batch_x, y: batch_y})
+            print("Iter " + str(step*batch_size) + ", Minibatch Loss= " + \
+                  "{:.6f}".format(loss) + ", Training Accuracy= " + \
+                  "{:.5f}".format(acc))
+        step += 1
+    print("Optimization Finished!")
+
+    # Calculate accuracy for 128 mnist test images
+    test_len = 128
+    test_data = mnist.test.images[:test_len].reshape((-1, n_steps, n_input))
+    test_label = mnist.test.labels[:test_len]
+    print("Testing Accuracy:", \
+        sess.run(accuracy, feed_dict={x: test_data, y: test_label}))
+
