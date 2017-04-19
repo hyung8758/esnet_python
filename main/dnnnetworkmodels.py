@@ -175,6 +175,7 @@ class DNNmodel(object):
 
     def closeDNN(self):
         self.dnn_sess.close()
+        tf.reset_default_graph()
         print("DNN training session is terminated.")
 
 
@@ -304,6 +305,7 @@ class RBMmodel(object):
 
     def closeRBM(self):
         self.rbm_sess.close()
+        tf.reset_default_graph()
         print("RBM training session is terminated.")
 
 

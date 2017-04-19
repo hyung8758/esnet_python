@@ -24,12 +24,12 @@ test_data_size = test_input.shape[0]
 ### ANN
 # parameter setting.
 
+problem = 'classification' # classification, regression
 fineTrainEpoch = 200
 fineLearningRate = 0.001
 learningRateDecay = 'off' # on, off
 batchSize = 100
 hiddenLayers = [200]
-problem = 'classification' # classification, regression
 hiddenFunction= 'tanh'
 costFunction = 'adam' # gradient, adam
 validationCheck = 'on' # if validationCheck is on, then 20% of train data will be taken for validation.
@@ -87,37 +87,40 @@ test_output = ann_data['test_output']
 # parameters
 problem = 'classification' # classification, regression
 rnnCell = 'lstm' # rnn, lstm, gru
-trainEpoch = 20
-learningRate = 0.01
+trainEpoch = 3
+learningRate = 0.001
 learningRateDecay = 'on' # on, off
 batchSize = 100
-hiddenLayers = [200]
+dropout = 'on' # on, off
+hiddenLayers = [200,200]
 timeStep = 20
 costFunction = 'adam' # gradient, adam
 validationCheck = 'off' # if validationCheck is on, then 20% of train data will be taken for validation.
 
-lstm_values = set.simpleRNNParam(inputData=train_input,
-                                 targetData=train_output,
-                                 timeStep=timeStep,
-                                 hiddenUnits=hiddenLayers)
+lstm_values = set.RNNParam(inputData=train_input,
+                           targetData=train_output,
+                           timeStep=timeStep,
+                           hiddenUnits=hiddenLayers)
 
 # Setting hidden layers: weightMatrix and biasMatrix
 lstm_weightMatrix = lstm_values.genWeight()
 lstm_biasMatrix = lstm_values.genBias()
 lstm_input_x,lstm_input_y = lstm_values.genSymbol()
 
-lstm_net = net.simpleRNNModel(inputSymbol=lstm_input_x,
-                              outputSymbol=lstm_input_y,
-                              rnnCell=rnnCell,
-                              problem=problem,
-                              trainEpoch=trainEpoch,
-                              learningRate=learningRate,
-                              learningRateDecay=learningRateDecay,
-                              timeStep=timeStep,
-                              batchSize=batchSize,
-                              validationCheck=validationCheck,
-                              weightMatrix=lstm_weightMatrix,
-                              biasMatrix=lstm_biasMatrix)
+lstm_net = net.RNNModel(inputSymbol=lstm_input_x,
+                        outputSymbol=lstm_input_y,
+                        rnnCell=rnnCell,
+                        problem=problem,
+                        hiddenLayer=hiddenLayers,
+                        trainEpoch=trainEpoch,
+                        learningRate=learningRate,
+                        learningRateDecay=learningRateDecay,
+                        timeStep=timeStep,
+                        batchSize=batchSize,
+                        dropout=dropout,
+                        validationCheck=validationCheck,
+                        weightMatrix=lstm_weightMatrix,
+                        biasMatrix=lstm_biasMatrix)
 
 # Generate a RNN(lstm) network.
 lstm_net.genRNN()
@@ -127,5 +130,5 @@ lstm_net.trainRNN(train_input,train_output)
 lstm_net.testRNN(test_input,test_output)
 # Save the trained parameters.
 vars = lstm_net.getVariables()
-# Terminate the session.
-lstm_net.closeRNN()
+# Terminatelstm_net.closeRNN() the session.
+

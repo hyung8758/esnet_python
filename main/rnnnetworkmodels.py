@@ -10,34 +10,35 @@ import tensorflow as tf
 import tensorflow.contrib.rnn as rnn
 
 ### RNN
-'''
-Simple means it has only one hidden layer.
-This "simpleRNNmodel" will be updated to "RNNmodel" when it is fixed to support multiple hidden layers.
-'''
-class simpleRNNModel(object):
+class RNNModel(object):
 
-    def __init__(self,inputSymbol,outputSymbol,rnnCell,problem,trainEpoch,learningRate,learningRateDecay,timeStep,batchSize,
-                 validationCheck,weightMatrix,biasMatrix):
+    def __init__(self,inputSymbol,outputSymbol,rnnCell,problem,hiddenLayer,trainEpoch,learningRate,
+                 learningRateDecay,timeStep,batchSize,dropout,validationCheck,weightMatrix,biasMatrix):
         self.input_x = inputSymbol
         self.input_y = outputSymbol
         self.rnnCell = rnnCell
         self.problem = problem
+        self.num_hidden_layers = len(hiddenLayer)
         self.trainEpoch = trainEpoch
         self.lr = learningRate
         self.timeStep = timeStep
         self.batchSize = batchSize
+        self.dropout = dropout
         self.validationCheck = validationCheck
         self.weightMatrix = weightMatrix
         self.biasMatrix = biasMatrix
         # Setting for LearningRateDecay option.
         if learningRateDecay == 'on':
             self.lr = tf.train.exponential_decay(learningRate, self.trainEpoch * self.batchSize,
-                                                         self.batchSize, 0.96, staircase=True)
+                                                 self.batchSize, 0.96, staircase=True)
+            self.lrOpt='Exponential Decay'
         elif learningRateDecay == 'off':
             self.lr = learningRate if learningRate is not None else 0.01
+            self.lrOpt=str(self.lr)
         else:
             print('learningRateDecay option is not properly set. It will be off as a default.')
             self.lr = learningRate if learningRate is not None else 0.01
+            self.lrOpt = str(self.lr)
 
 
         # Check data type
@@ -47,22 +48,42 @@ class simpleRNNModel(object):
             self.dtype = tf.float64
         else:
             raise ValueError('Input data type should be float for input and weight multiplication.')
-        if self.rnnCell == 'rnn' or self.rnnCell == 'lstm' or self.rnnCell == 'gru':
-            print('RNN cell type is',self.rnnCell)
+        if self.rnnCell == 'rnn' or self.rnnCell == 'lstm' or self.rnnCell == 'gru': pass
         else: raise ValueError(self.rnnCell+' is not a correct cell type. Please provide rnn or lstm.')
+        print("########## RNN Setting #########")
+        print("Task          :",self.problem)
+        print("Cell Type     :", self.rnnCell)
+        print("Hidden Layers :", self.num_hidden_layers)
+        print("Hidden Units  :", str(hiddenLayer))
+        print("Train Epoch   :", str(self.trainEpoch))
+        print("Learning Rate :", self.lrOpt)
+        print("Time Steps    :", str(self.timeStep))
+        print("Batch Size    :", str(self.batchSize))
+        print("Drop Out      :", self.dropout)
+        print("Validation    :", self.validationCheck)
+        print("########## RNN Setting #########")
 
 
     def genRNN(self):
 
+        # Set RNN cell type.
         if self.rnnCell == 'rnn':
             rnn_cell = rnn.BasicRNNCell(self.weightMatrix.get_shape()[0].value)
         elif self.rnnCell == 'lstm':
             rnn_cell = rnn.BasicLSTMCell(self.weightMatrix.get_shape()[0].value, forget_bias=1.0)
         elif self.rnnCell == 'gru':
             rnn_cell = rnn.GRUCell(self.weightMatrix.get_shape()[0].value)
+        # Set the dropout option.
+        if self.dropout == 'on':
+            rnn_cell = rnn.DropoutWrapper(rnn_cell)
+        # Set the number of hidden layers.
+        if self.num_hidden_layers > 1:
+            print('RNN cell is stacked on MultiRNNCell since it has {} hidden Layers.'.format(self.num_hidden_layers))
+            rnn_cell = rnn.MultiRNNCell([rnn_cell] * self.num_hidden_layers)
 
         # Get rnn cell output
         outputs, states = tf.nn.dynamic_rnn(rnn_cell, self.input_x, dtype=self.dtype)
+
         # batch_size * timeStep
         outputs = tf.reshape(outputs, [-1, outputs.get_shape()[2].value])
         self.pred_val = tf.matmul(outputs, self.weightMatrix) + self.biasMatrix
@@ -79,10 +100,13 @@ class simpleRNNModel(object):
             self.last_out = tf.reduce_mean(tf.square(self.pred_val - self.input_y))
             self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.last_out)
 
+        print("RNN structure is generated.")
+
 
     def trainRNN(self,train_inputs,train_targets):
 
         # Initialize the variables.
+        print("Activating training process.")
         self.init = tf.global_variables_initializer()
 
         # Activate the graph.
@@ -139,6 +163,7 @@ class simpleRNNModel(object):
 
     def testRNN(self,test_inputs,test_targets):
 
+        print("Activating Testing Process")
         if self.problem is 'classification':
             test_targets = np.reshape(test_targets, [-1, test_targets.shape[2]])
             result, self.y_hat = self.rnn_sess.run([self.accuracy, self.last_out], feed_dict={self.input_x: test_inputs, self.input_y: test_targets})
@@ -162,5 +187,6 @@ class simpleRNNModel(object):
 
     def closeRNN(self):
         self.rnn_sess.close()
-        print("Simple RNN training session is terminated.")
+        tf.reset_default_graph()
+        print("RNN training session is terminated.")
 

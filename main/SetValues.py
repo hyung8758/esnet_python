@@ -150,8 +150,8 @@ class setParam(object):
 
         return self.input_x, self.input_y
 
-# Setting the simple LSTM default value. Simple lSTM has only one hidden layer.
-class simpleRNNParam(object):
+# Setting the RNN default value.
+class RNNParam(object):
 
     def __init__(self,inputData,targetData,timeStep,hiddenUnits):
         self.inputs = inputData
