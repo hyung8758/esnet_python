@@ -1,7 +1,5 @@
 '''
-NetworkModel for constructing ANN and DBN models
-Feedforward networks, gradient descent.
-
+Machine Learning Network for RNN, LSTM, and GRU(will be supported soon).
 
                                                                     Written by Hyungwon Yang
                                                                                 2016. 02. 07
@@ -10,15 +8,19 @@ Feedforward networks, gradient descent.
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.rnn as rnn
-import main.visualtools as vt
 
-### LSTM
-class simpleLSTMmodel(object):
+### RNN
+'''
+Simple means it has only one hidden layer.
+This "simpleRNNmodel" will be updated to "RNNmodel" when it is fixed to support multiple hidden layers.
+'''
+class simpleRNNModel(object):
 
-    def __init__(self,inputSymbol,outputSymbol,problem,trainEpoch,learningRate,timeStep,batchSize,
+    def __init__(self,inputSymbol,outputSymbol,rnnCell,problem,trainEpoch,learningRate,timeStep,batchSize,
                  validationCheck,weightMatrix,biasMatrix):
         self.input_x = inputSymbol
         self.input_y = outputSymbol
+        self.rnnCell = rnnCell
         self.problem = problem
         self.trainEpoch = trainEpoch
         self.lr = learningRate
@@ -27,17 +29,27 @@ class simpleLSTMmodel(object):
         self.validationCheck = validationCheck
         self.weightMatrix = weightMatrix
         self.biasMatrix = biasMatrix
+        # Check data type
         if inputSymbol.dtype == 'float32':
             self.dtype = tf.float32
         elif inputSymbol.dtype == 'float64':
             self.dtype = tf.float64
         else:
-            ValueError('Input data type should be float for input and weight multiplication.')
-    def genLSTM(self):
+            raise ValueError('Input data type should be float for input and weight multiplication.')
+        if self.rnnCell == 'rnn' or self.rnnCell == 'lstm' or self.rnnCell == 'gru':
+            print('RNN cell type is',self.rnnCell)
+        else: raise ValueError(self.rnnCell+' is not a correct cell type. Please provide rnn or lstm.')
+    def genRNN(self):
 
-        lstm_cell = rnn.BasicLSTMCell(self.weightMatrix.get_shape()[0].value, forget_bias=1.0)
-        # Get lstm cell output
-        outputs, states = tf.nn.dynamic_rnn(lstm_cell, self.input_x, dtype=self.dtype)
+        if self.rnnCell == 'rnn':
+            rnn_cell = rnn.BasicRNNCell(self.weightMatrix.get_shape()[0].value)
+        elif self.rnnCell == 'lstm':
+            rnn_cell = rnn.BasicLSTMCell(self.weightMatrix.get_shape()[0].value, forget_bias=1.0)
+        elif self.rnnCell == 'gru':
+            rnn_cell = rnn.GRUCell(self.weightMatrix.get_shape()[0].value)
+
+        # Get rnn cell output
+        outputs, states = tf.nn.dynamic_rnn(rnn_cell, self.input_x, dtype=self.dtype)
         # batch_size * timeStep
         outputs = tf.reshape(outputs, [-1, outputs.get_shape()[2].value])
         self.pred_val = tf.matmul(outputs, self.weightMatrix) + self.biasMatrix
@@ -55,14 +67,14 @@ class simpleLSTMmodel(object):
             self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.last_out)
 
 
-    def trainLSTM(self,train_inputs,train_targets):
+    def trainRNN(self,train_inputs,train_targets):
 
         # Initialize the variables.
         self.init = tf.global_variables_initializer()
 
         # Activate the graph.
-        self.lstm_sess = tf.Session()
-        self.lstm_sess.run(self.init)
+        self.rnn_sess = tf.Session()
+        self.rnn_sess.run(self.init)
 
         if self.validationCheck == 'on':
             train_num = train_inputs.shape[0]
@@ -84,35 +96,43 @@ class simpleLSTMmodel(object):
                 batch_x = train_inputs[start:last]
                 batch_y = train_targets[start:last]
                 batch_y = np.reshape(batch_y,[-1, batch_y.shape[2]])
-                _, loss = self.lstm_sess.run([self.optimizer,self.last_out],
+                _, loss = self.rnn_sess.run([self.optimizer,self.last_out],
                                         feed_dict={self.input_x: batch_x, self.input_y: batch_y})
                 # Calculate mean loss.
                 total_loss.append(loss)
 
-            print("Epoch :",str(epoch + 1),"/",str(self.trainEpoch),", Cost : " + "{:.6f}".format(np.mean(total_loss)))
             if self.validationCheck == 'on':
                 if self.problem == 'classification':
                     if epoch == 0:
                         valid_targets = np.reshape(valid_targets, [-1, valid_targets.shape[2]])
-                    result, self.y_hat = self.lstm_sess.run([self.accuracy, self.last_out],
+                    result, self.y_hat = self.rnn_sess.run([self.accuracy, self.last_out],
                                                        feed_dict={self.input_x: valid_inputs, self.input_y: valid_targets})
-                    print("Validation Accuracy: " + "{:.2f}".format(result * 100) + " %")
+                    print("Epoch: {} / {}, Cost : {:.6f}, Validation Accuracy: {:.2f}%".format(str(epoch + 1),
+                                                                                               str(self.trainEpoch),
+                                                                                               np.mean(total_loss),
+                                                                                               result * 100))
                 elif self.problem == 'regression':
-                    result, self.y_hat = self.lstm_sess.run([self.last_out, self.pred_val],
+                    result, self.y_hat = self.rnn_sess.run([self.last_out, self.pred_val],
                                                        feed_dict={self.input_x: valid_inputs,self.input_y: valid_targets})
-                    print("Validation Error: " + "{:.4f}".format(result) + " %")
-
+                    print("Epoch: {} / {}, Cost : {:.6f}, Validation Error: {:.4f}%".format(str(epoch + 1),
+                                                                                            str(self.trainEpoch),
+                                                                                            np.mean(total_loss),
+                                                                                            result))
+            else:
+                print("Epoch: {} / {}, Cost : {:.6f}".format(str(epoch + 1),
+                                                             str(self.trainEpoch),
+                                                             np.mean(total_loss)))
         print("The model has been trained successfully.")
 
-    def testLSTM(self,test_inputs,test_targets):
+    def testRNN(self,test_inputs,test_targets):
 
         if self.problem is 'classification':
             test_targets = np.reshape(test_targets, [-1, test_targets.shape[2]])
-            result, self.y_hat = self.lstm_sess.run([self.accuracy, self.last_out], feed_dict={self.input_x: test_inputs, self.input_y: test_targets})
+            result, self.y_hat = self.rnn_sess.run([self.accuracy, self.last_out], feed_dict={self.input_x: test_inputs, self.input_y: test_targets})
             print("Tested with " + str(test_inputs.shape[0]) + " datasets.\n" + "Test Accuracy: " + "{:.2f}".format(result * 100) + " %")
 
         elif self.problem is 'regression':
-            result, self.y_hat = self.lstm_sess.run([self.last_out,self.pred_val], feed_dict={self.input_x: test_inputs, self.input_y: test_targets})
+            result, self.y_hat = self.rnn_sess.run([self.last_out,self.pred_val], feed_dict={self.input_x: test_inputs, self.input_y: test_targets})
             print("Tested with " + str(test_targets.shape[2])+ " datasets.\n" + "Test Error: " + "{:.4f}".format(result) + " %")
 
 
@@ -127,7 +147,7 @@ class simpleLSTMmodel(object):
 
         return var_dict
 
-    def closeLSTM(self):
-        self.lstm_sess.close()
-        print("Simple LSTM training session is terminated.")
+    def closeRNN(self):
+        self.rnn_sess.close()
+        print("Simple RNN training session is terminated.")
 

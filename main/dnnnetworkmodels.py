@@ -1,7 +1,5 @@
 '''
-NetworkModel for constructing ANN and DBN models
-Feedforward networks, gradient descent.
-
+Machine Learning Network for DNN and RBM.
 
                                                                     Written by Hyungwon Yang
                                                                                 2016. 02. 07
@@ -125,15 +123,24 @@ class DNNmodel(object):
                 # Calculate mean loss.
                 cost_mean += loss/total_batch
 
-            print("Epoch :",str(epoch + 1),"/",str(self.fineTrainEpoch),", Cost : " + "{:.6f}".format(cost_mean))
             if self.validationCheck == 'on':
                 if self.problem == 'classification':
                     result, self.y_hat = self.dnn_sess.run([self.accuracy, self.last_out],
                                                        feed_dict={self.input_x: valid_inputs, self.input_y: valid_targets})
-                    print("Validation Accuracy: " + "{:.2f}".format(result * 100) + " %")
+                    print("Epoch: {} / {}, Cost : {:.6f}, Validation Accuracy: {:.2f}%".format(str(epoch + 1),
+                                                                                               str(self.fineTrainEpoch),
+                                                                                               np.mean(cost_mean),
+                                                                                               result * 100))
                 elif self.problem == 'regression':
                     result = self.dnn_sess.run(self.cost, feed_dict={self.input_x: valid_inputs,self.input_y: valid_targets})
-                    print("Validation Error: " + "{:.4f}".format(result) + " %")
+                    print("Epoch: {} / {}, Cost : {:.6f}, Validation Error: {:.4f}%".format(str(epoch + 1),
+                                                                                            str(self.fineTrainEpoch),
+                                                                                            np.mean(cost_mean),
+                                                                                            result))
+            else:
+                print("Epoch: {} / {}, Cost : {:.6f}".format(str(epoch + 1),
+                                                             str(self.fineTrainEpoch),
+                                                             np.mean(cost_mean)))
 
         print("The model has been trained successfully.")
 
@@ -298,10 +305,6 @@ class RBMmodel(object):
         self.rbm_sess.close()
         print("RBM training session is terminated.")
 
-
-### CNN
-
-### RNN
 
 
 
