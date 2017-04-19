@@ -9,11 +9,6 @@ Please run this script in the HY_python_NN folder.
 Do not move this script to other directory.
 '''
 
-# This script downloads the train and test dataset.
-# Please run this script in the HY_python_NN folder.
-# Do not move this script to other directory.
-
-
 
 import sys
 import requests

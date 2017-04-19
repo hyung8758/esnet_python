@@ -18,7 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Calculating Mean Sequare Error
-def MSE(target_y,hat_y):
+def mse(target_y,hat_y):
 
     hat_out = np.concatenate(hat_y,axis=0)
     hat_line = np.concatenate(hat_out,axis=0)
@@ -44,7 +44,7 @@ def pearsonR(target_y,hat_y):
 
 
 # Correlation plot for curvefitting problem (regression)
-def correlationplot(target_y,hat_y):
+def correlationPlot(target_y,hat_y):
 
     hat_out = np.concatenate(hat_y,axis=0)
     hat_line = np.concatenate(hat_out,axis=0)

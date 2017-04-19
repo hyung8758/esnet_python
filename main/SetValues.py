@@ -9,7 +9,6 @@ For setting default values of ANN and DBN.
 
 import numpy as np
 import tensorflow as tf
-import main.visualtools as vt
 
 # Setting the DBN default value.
 class setParam(object):
@@ -152,7 +151,7 @@ class setParam(object):
         return self.input_x, self.input_y
 
 # Setting the simple LSTM default value. Simple lSTM has only one hidden layer.
-class simpleLSTMParam(object):
+class simpleRNNParam(object):
 
     def __init__(self,inputData,targetData,timeStep,hiddenUnits):
         self.inputs = inputData

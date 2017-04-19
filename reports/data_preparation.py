@@ -129,7 +129,8 @@ for dat in list(range(test_data_size - 1)):
     output_idx = lookup_chars.index(output_sym)
     ann_test_input_char[dat][input_idx] = 1
     ann_test_output_char[dat][output_idx] = 1
-np.savez('train_data/pg8800_ann_char_data',train_input=ann_train_input_char,train_output=ann_train_output_char,test_input=ann_test_input_char,test_output=ann_test_output_char)
+np.savez('train_data/pg8800_ann_char_data',train_input=ann_train_input_char,
+         train_output=ann_train_output_char,test_input=ann_test_input_char,test_output=ann_test_output_char)
 
 ## LSTM
 lstm_train_input_char = np.zeros((int(train_data_size/timeStep),timeStep,vocab_size))
@@ -158,4 +159,5 @@ for dat in list(range(int(test_data_size/timeStep)-1)):
         lstm_test_input_char[dat][times][input_idx] = 1
         lstm_test_output_char[dat][times][output_idx] = 1
         his += 1
-np.savez('train_data/pg8800_lstm_char_data',train_input=lstm_train_input_char,train_output=lstm_train_output_char,test_input=lstm_test_input_char,test_output=lstm_test_output_char)
+np.savez('train_data/pg8800_lstm_char_data',train_input=lstm_train_input_char,
+         train_output=lstm_train_output_char,test_input=lstm_test_input_char,test_output=lstm_test_output_char)

@@ -7,7 +7,7 @@ Word prediction training with two methods: ANN and LSTM(RNN)
 '''
 import numpy as np
 import main.setvalues as set
-import main.networkmodels as net
+import main.dnnnetworkmodels as net
 
 
 # import data.
@@ -33,12 +33,12 @@ problem = 'classification' # classification, regression
 hiddenFunction= 'tanh'
 costFunction = 'adam' # gradient, adam
 validationCheck = 'on' # if validationCheck is on, then 20% of train data will be taken for validation.
-PlotGraph = 'off'
+PlotGraph = 'off' # If this is on, graph will be saved in the rnn_graph directory.
+                  # You can check the dnn structure on the tensorboard.
 
 DNN_values = set.setParam(inputData=train_input,
                     targetData=train_output,
-                    hiddenUnits=hiddenLayers
-                    )
+                    hiddenUnits=hiddenLayers)
 
 # Setting hidden layers: weightMatrix and biasMatrix
 weightMatrix = DNN_values.genWeight()
@@ -57,8 +57,7 @@ dnn = net.DNNmodel(inputSymbol=input_x,
                    costFunction=costFunction,
                    validationCheck=validationCheck,
                    weightMatrix=weightMatrix,
-                   biasMatrix=biasMatrix
-                   )
+                   biasMatrix=biasMatrix)
 
 # Generate a DNN network.
 dnn.genDNN()
@@ -76,7 +75,7 @@ dnn.closeDNN()
 
 import numpy as np
 import main.setvalues as set
-import main.lstmnetworkmodels as net
+import main.rnnnetworkmodels as net
 
 # import data.
 ann_data = np.load('train_data/pg8800_lstm_char_data.npz')
@@ -86,46 +85,46 @@ test_input = ann_data['test_input']
 test_output = ann_data['test_output']
 
 # parameters
+problem = 'classification' # classification, regression
+rnnCell = 'rnn' # rnn, lstm, gru
 trainEpoch = 200
 learningRate = 0.001
 learningRateDecay = 'off' # on, off
 batchSize = 100
 hiddenLayers = [200]
 timeStep = 20
-problem = 'classification' # classification, regression
 costFunction = 'adam' # gradient, adam
-plotOption = 'off'
 validationCheck = 'on' # if validationCheck is on, then 20% of train data will be taken for validation.
 
-lstm_values = set.simpleLSTMParam(inputData=train_input,
-                           targetData=train_output,
-                           timeStep=timeStep,
-                           hiddenUnits=hiddenLayers
-                           )
+lstm_values = set.simpleRNNParam(inputData=train_input,
+                                 targetData=train_output,
+                                 timeStep=timeStep,
+                                 hiddenUnits=hiddenLayers)
 
 # Setting hidden layers: weightMatrix and biasMatrix
 lstm_weightMatrix = lstm_values.genWeight()
 lstm_biasMatrix = lstm_values.genBias()
 lstm_input_x,lstm_input_y = lstm_values.genSymbol()
 
-lstm_net = net.simpleLSTMmodel(inputSymbol=lstm_input_x,
-                               outputSymbol=lstm_input_y,
-                               problem=problem,
-                               trainEpoch=trainEpoch,
-                               learningRate=learningRate,
-                               timeStep=timeStep,
-                               batchSize=batchSize,
-                               validationCheck=validationCheck,
-                               weightMatrix=lstm_weightMatrix,
-                               biasMatrix=lstm_biasMatrix)
+lstm_net = net.simpleRNNModel(inputSymbol=lstm_input_x,
+                              outputSymbol=lstm_input_y,
+                              rnnCell=rnnCell,
+                              problem=problem,
+                              trainEpoch=trainEpoch,
+                              learningRate=learningRate,
+                              timeStep=timeStep,
+                              batchSize=batchSize,
+                              validationCheck=validationCheck,
+                              weightMatrix=lstm_weightMatrix,
+                              biasMatrix=lstm_biasMatrix)
 
 # Generate a RNN(lstm) network.
-lstm_net.genLSTM()
+lstm_net.genRNN()
 # Train the RNN(lstm) network.
-lstm_net.trainLSTM(train_input,train_output)
+lstm_net.trainRNN(train_input,train_output)
 # Test the trained RNN(lstm) network.
-lstm_net.testLSTM(test_input,test_output)
+lstm_net.testRNN(test_input,test_output)
 # Save the trained parameters.
 vars = lstm_net.getVariables()
 # Terminate the session.
-lstm_net.closeLSTM()
+lstm_net.closeRNN()
