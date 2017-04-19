@@ -25,6 +25,7 @@ class DNNmodel(object):
         self.weightMatrix = weightMatrix
         self.biasMatrix = biasMatrix
         self.plotGraph = plotGraph
+        # Setting for LearningRateDecay option.
         if learningRateDecay == 'on':
             self.finelr = tf.train.exponential_decay(fineLearningRate, self.fineTrainEpoch * self.batchSize,
                                                          self.batchSize, 0.96, staircase=True)
@@ -127,19 +128,19 @@ class DNNmodel(object):
                 if self.problem == 'classification':
                     result, self.y_hat = self.dnn_sess.run([self.accuracy, self.last_out],
                                                        feed_dict={self.input_x: valid_inputs, self.input_y: valid_targets})
-                    print("Epoch: {} / {}, Cost : {:.6f}, Validation Accuracy: {:.2f}%".format(str(epoch + 1),
-                                                                                               str(self.fineTrainEpoch),
+                    print("Epoch: {:3d} / {:3d}, Cost : {:.6f}, Validation Accuracy: {:3.2f}%".format(epoch + 1,
+                                                                                               self.fineTrainEpoch,
                                                                                                np.mean(cost_mean),
                                                                                                result * 100))
                 elif self.problem == 'regression':
                     result = self.dnn_sess.run(self.cost, feed_dict={self.input_x: valid_inputs,self.input_y: valid_targets})
-                    print("Epoch: {} / {}, Cost : {:.6f}, Validation Error: {:.4f}%".format(str(epoch + 1),
-                                                                                            str(self.fineTrainEpoch),
+                    print("Epoch: {:3d} / {:3d}, Cost : {:.6f}, Validation Error: {:.4f}%".format(epoch + 1,
+                                                                                            self.fineTrainEpoch,
                                                                                             np.mean(cost_mean),
                                                                                             result))
             else:
-                print("Epoch: {} / {}, Cost : {:.6f}".format(str(epoch + 1),
-                                                             str(self.fineTrainEpoch),
+                print("Epoch: {:3d} / {:3d}, Cost : {:.6f}".format(epoch + 1,
+                                                             self.fineTrainEpoch,
                                                              np.mean(cost_mean)))
 
         print("The model has been trained successfully.")
@@ -280,7 +281,7 @@ class RBMmodel(object):
                         saved_error = np.vstack((saved_error,err))
 
                     # Get all the newly generated inputs for next hidden layer's inputs.
-                print('{}/{} Hidden Layer, {}/{} epoch'.format(hid + 1, self.hiddenNumber, epoch + 1, self.preTrainEpoch))
+                print('{:3d}/{:3d} Hidden Layer, {:3d}/{:3d} epoch'.format(hid + 1, self.hiddenNumber, epoch + 1, self.preTrainEpoch))
                 print('MSE: ' + str(np.mean(saved_error)))
                 # Change input value.
                 if epoch+1 == self.preTrainEpoch:

@@ -16,7 +16,7 @@ This "simpleRNNmodel" will be updated to "RNNmodel" when it is fixed to support 
 '''
 class simpleRNNModel(object):
 
-    def __init__(self,inputSymbol,outputSymbol,rnnCell,problem,trainEpoch,learningRate,timeStep,batchSize,
+    def __init__(self,inputSymbol,outputSymbol,rnnCell,problem,trainEpoch,learningRate,learningRateDecay,timeStep,batchSize,
                  validationCheck,weightMatrix,biasMatrix):
         self.input_x = inputSymbol
         self.input_y = outputSymbol
@@ -29,6 +29,17 @@ class simpleRNNModel(object):
         self.validationCheck = validationCheck
         self.weightMatrix = weightMatrix
         self.biasMatrix = biasMatrix
+        # Setting for LearningRateDecay option.
+        if learningRateDecay == 'on':
+            self.lr = tf.train.exponential_decay(learningRate, self.trainEpoch * self.batchSize,
+                                                         self.batchSize, 0.96, staircase=True)
+        elif learningRateDecay == 'off':
+            self.lr = learningRate if learningRate is not None else 0.01
+        else:
+            print('learningRateDecay option is not properly set. It will be off as a default.')
+            self.lr = learningRate if learningRate is not None else 0.01
+
+
         # Check data type
         if inputSymbol.dtype == 'float32':
             self.dtype = tf.float32
@@ -39,6 +50,8 @@ class simpleRNNModel(object):
         if self.rnnCell == 'rnn' or self.rnnCell == 'lstm' or self.rnnCell == 'gru':
             print('RNN cell type is',self.rnnCell)
         else: raise ValueError(self.rnnCell+' is not a correct cell type. Please provide rnn or lstm.')
+
+
     def genRNN(self):
 
         if self.rnnCell == 'rnn':
@@ -107,20 +120,20 @@ class simpleRNNModel(object):
                         valid_targets = np.reshape(valid_targets, [-1, valid_targets.shape[2]])
                     result, self.y_hat = self.rnn_sess.run([self.accuracy, self.last_out],
                                                        feed_dict={self.input_x: valid_inputs, self.input_y: valid_targets})
-                    print("Epoch: {} / {}, Cost : {:.6f}, Validation Accuracy: {:.2f}%".format(str(epoch + 1),
-                                                                                               str(self.trainEpoch),
+                    print("Epoch: {:3d} / {:3d}, Cost : {:.6f}, Validation Accuracy: {:3.2f}%".format(epoch + 1,
+                                                                                               self.trainEpoch,
                                                                                                np.mean(total_loss),
                                                                                                result * 100))
                 elif self.problem == 'regression':
                     result, self.y_hat = self.rnn_sess.run([self.last_out, self.pred_val],
                                                        feed_dict={self.input_x: valid_inputs,self.input_y: valid_targets})
-                    print("Epoch: {} / {}, Cost : {:.6f}, Validation Error: {:.4f}%".format(str(epoch + 1),
-                                                                                            str(self.trainEpoch),
+                    print("Epoch: {:3d} / {:3d}, Cost : {:.6f}, Validation Error: {:.4f}%".format(epoch + 1,
+                                                                                            self.trainEpoch,
                                                                                             np.mean(total_loss),
                                                                                             result))
             else:
-                print("Epoch: {} / {}, Cost : {:.6f}".format(str(epoch + 1),
-                                                             str(self.trainEpoch),
+                print("Epoch: {:3d} / {:3d}, Cost : {:.6f}".format(epoch + 1,
+                                                             self.trainEpoch,
                                                              np.mean(total_loss)))
         print("The model has been trained successfully.")
 

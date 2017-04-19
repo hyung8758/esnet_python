@@ -86,15 +86,15 @@ test_output = ann_data['test_output']
 
 # parameters
 problem = 'classification' # classification, regression
-rnnCell = 'rnn' # rnn, lstm, gru
-trainEpoch = 200
-learningRate = 0.001
-learningRateDecay = 'off' # on, off
+rnnCell = 'lstm' # rnn, lstm, gru
+trainEpoch = 20
+learningRate = 0.01
+learningRateDecay = 'on' # on, off
 batchSize = 100
 hiddenLayers = [200]
 timeStep = 20
 costFunction = 'adam' # gradient, adam
-validationCheck = 'on' # if validationCheck is on, then 20% of train data will be taken for validation.
+validationCheck = 'off' # if validationCheck is on, then 20% of train data will be taken for validation.
 
 lstm_values = set.simpleRNNParam(inputData=train_input,
                                  targetData=train_output,
@@ -112,6 +112,7 @@ lstm_net = net.simpleRNNModel(inputSymbol=lstm_input_x,
                               problem=problem,
                               trainEpoch=trainEpoch,
                               learningRate=learningRate,
+                              learningRateDecay=learningRateDecay,
                               timeStep=timeStep,
                               batchSize=batchSize,
                               validationCheck=validationCheck,

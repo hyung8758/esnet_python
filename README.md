@@ -59,4 +59,4 @@ VERSION HISTORY
 2.1 (2017.04.14)
  - All of the scripts are rewritten based on tensorflow.
  - RNN(Vanilla, LSTM, GRU) is added.
- - Smoe reports are uploaded.
+ - Some reports are uploaded.

@@ -205,7 +205,7 @@ import main.rnnnetworkmodels as net
 problem = 'regression' # classification, regression
 rnnCell = 'lstm' # rnn, lstm, gru
 trainEpoch = 10
-learningRate = 0.0001
+learningRate = 0.001
 learningRateDecay = 'off' # on, off
 batchSize = 100
 hiddenLayers = [200]
@@ -245,17 +245,18 @@ lstm_net = net.simpleRNNModel(inputSymbol=lstm_input_x,
                               problem=problem,
                               trainEpoch=trainEpoch,
                               learningRate=learningRate,
+                              learningRateDecay=learningRateDecay,
                               timeStep=timeStep,
                               batchSize=batchSize,
                               validationCheck=validationCheck,
                               weightMatrix=lstm_weightMatrix,
                               biasMatrix=lstm_biasMatrix)
 
-# Generate a RNN(lstm) network.
+# Generate a RNN network.
 lstm_net.genRNN()
-# Train the RNN(lstm) network.
+# Train the RNN network.
 lstm_net.trainRNN(train_input,train_output)
-# Test the trained RNN(lstm) network.
+# Test the trained RNN network.
 lstm_net.testRNN(test_input,test_output)
 # Save the trained parameters.
 vars = lstm_net.getVariables()
