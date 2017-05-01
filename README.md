@@ -4,36 +4,35 @@
                                                                    EMCS lab
 
 
-Machine learning toolbox based on Python and Tensorflow.
+### Machine learning toolbox based on Python and Tensorflow.
+---
+This toolbox is easy to implement to your research. 
 
 
-
-Linux and MacOSX (This script is not tested on Windows)
+### Version Compatibility
 ---
 
-- Python 3.5 and 3.6
-- tensorflow
+- Linux and MacOSX (This script is not tested on Windows)
+- Python 3.5 and 3.6 (Python2 is not supported)
+- tensorflow 1.1
 
-
-
-CONTENTS
+### CONTENTS
 ---
 - Machine learning scripts for classification & regression problems.
-1. main(dir) : Codes that build and run various neural networks are stored in this directory.
-2. reports(dir): Exeperiments such as comparing between or among machine learning task performances or replicating other scholars' works related to machine learning tasks are implemented and reported in this directory.
-3. train_data(dir): Small set of training and testing data (some of them are already preprocessed for convenience's sake) are ready for implementing simple experiments or testing newly structued networks.
-4. downloader.py(script): It downloads some of the dataset into train_data directory. Read the list of downloadable dataset and save it to your local disk by simply running this script.
+ 1. main(dir) : Codes that build and run various neural networks are stored in this directory.
+ 2. reports(dir): Exeperiments such as comparing between or among machine learning task performances or replicating other scholars' works related to machine learning tasks are implemented and reported in this directory.
+ 3. train_data(dir): Small set of training and testing data (some of them are already preprocessed for convenience's sake) are ready for implementing simple experiments or testing newly structued networks.
+ 4. train.py(script): This script shows how to build various nerual networks and train and test them with diverse datasets. 
 		
-CONTACTS
+### CONTACTS
 ---------------------------------------------------------------------------
 
-Hyungwon Yang / hyung8758@gmail.com
-
+- Developer: Hyungwon Yang (hyung8758@gmail.com)
 - Advisor: Hosung Nam 
 - Supporter: Heejo You, Jaekoo Kang
 
 
-VERSION HISTORY
+### VERSION HISTORY
 ---------------------------------------------------------------------------
 1.0 (2015.02.22)
  All 8 scripts were added. 
@@ -60,3 +59,9 @@ VERSION HISTORY
  - All of the scripts are rewritten based on tensorflow.
  - RNN(Vanilla, LSTM, GRU) is added.
  - Some reports are uploaded.
+
+2.2 (2017.05.01)
+ - Compatibility update with tensorflow version 1.1 
+ - Downloading function is added to loadfile.py so downloader.py is removed.
+ - Minor bugs are fixed. 
+ - Printing more detail informaiton.

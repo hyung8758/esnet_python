@@ -33,7 +33,7 @@ hiddenLayers = [200]
 hiddenFunction= 'tanh'
 costFunction = 'adam' # gradient, adam
 validationCheck = 'on' # if validationCheck is on, then 20% of train data will be taken for validation.
-PlotGraph = 'off' # If this is on, graph will be saved in the rnn_graph directory.
+plotGraph = 'off' # If this is on, graph will be saved in the rnn_graph directory.
                   # You can check the dnn structure on the tensorboard.
 
 DNN_values = set.setParam(inputData=train_input,
@@ -56,6 +56,7 @@ dnn = net.DNNmodel(inputSymbol=input_x,
                    hiddenFunction=hiddenFunction,
                    costFunction=costFunction,
                    validationCheck=validationCheck,
+                   plotGraph=plotGraph,
                    weightMatrix=weightMatrix,
                    biasMatrix=biasMatrix)
 
@@ -73,29 +74,27 @@ dnn.closeDNN()
 ####################################################################################################
 ### LSTM
 
-import numpy as np
 import main.setvalues as set
 import main.rnnnetworkmodels as net
+from main import loadfile as lf
 
 # import data.
-ann_data = np.load('train_data/pg8800_lstm_char_data.npz')
-train_input = ann_data['train_input']
-train_output = ann_data['train_output']
-test_input = ann_data['test_input']
-test_output = ann_data['test_output']
+train_input, train_output, test_input, test_output = lf.readpg8800rnnchar()
 
 # parameters
 problem = 'classification' # classification, regression
-rnnCell = 'lstm' # rnn, lstm, gru
-trainEpoch = 3
+rnnCell = 'gru' # rnn, lstm, gru
+trainEpoch = 10
 learningRate = 0.001
-learningRateDecay = 'on' # on, off
+learningRateDecay = 'off' # on, off
 batchSize = 100
-dropout = 'on' # on, off
-hiddenLayers = [200,200]
+dropout = 'off' # on, off
+hiddenLayers = [200]
 timeStep = 20
 costFunction = 'adam' # gradient, adam
 validationCheck = 'off' # if validationCheck is on, then 20% of train data will be taken for validation.
+plotGraph = 'off' # If this is on, graph will be saved in the rnn_graph directory.
+                  # You can check the dnn structure on the tensorboard.
 
 lstm_values = set.RNNParam(inputData=train_input,
                            targetData=train_output,
@@ -119,6 +118,7 @@ lstm_net = net.RNNModel(inputSymbol=lstm_input_x,
                         batchSize=batchSize,
                         dropout=dropout,
                         validationCheck=validationCheck,
+                        plotGraph=plotGraph,
                         weightMatrix=lstm_weightMatrix,
                         biasMatrix=lstm_biasMatrix)
 
@@ -131,4 +131,4 @@ lstm_net.testRNN(test_input,test_output)
 # Save the trained parameters.
 vars = lstm_net.getVariables()
 # Terminatelstm_net.closeRNN() the session.
-
+lstm_net.closeRNN()

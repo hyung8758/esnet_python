@@ -157,6 +157,7 @@ class RNNParam(object):
         self.inputs = inputData
         self.outputs = targetData
         self.hiddenUnits = hiddenUnits
+        self.num_hidden = len(hiddenUnits)
         self.timeStep = timeStep
         self.inputDim = inputData.shape[2]
         self.outputDim = targetData.shape[2]
@@ -165,28 +166,70 @@ class RNNParam(object):
         assert self.inputs.shape[0] and self.outputs.shape[0] > 0
 
     def genWeight(self):
-        # Check data type.
-        if self.inputs.dtype == 'float64':
-            tmp_weight = tf.Variable(tf.random_normal([self.hiddenUnits[0], self.outputDim]))
-            weight = tf.cast(tmp_weight, tf.float64)
-        elif self.inputs.dtype == 'float32':
-            tmp_weight = tf.Variable(tf.random_normal([self.hiddenUnits[0], self.outputDim]))
-            weight = tf.cast(tmp_weight, tf.float32)
+
+        weightMatrix = []
+        if self.num_hidden == 1:
+            tmp_weight = tf.get_variable("weight_0",[self.hiddenUnits[0], self.outputDim],
+                                                     initializer=tf.random_normal_initializer())
+            # Check data type.
+            if self.inputs.dtype == 'float64':
+                weight = tf.cast(tmp_weight, tf.float64)
+            elif self.inputs.dtype == 'float32':
+                weight = tf.cast(tmp_weight, tf.float32)
+            else:
+                ValueError('Input data type should be float for input and weight multiplication.')
+            weightMatrix.append(weight)
         else:
-            ValueError('Input data type should be float for input and weight multiplication.')
-        return weight
+            for num in range(self.num_hidden):
+                if num != self.num_hidden-1:
+                    tmp_weight = tf.get_variable("weight_"+str(num),[self.hiddenUnits[num],self.hiddenUnits[num+1]])
+                else:
+                    tmp_weight = tf.get_variable("weight_"+str(num),[self.hiddenUnits[-1],self.outputDim],
+                                                 initializer=tf.random_normal_initializer())
+                # Check data type.
+                if self.inputs.dtype == 'float64':
+                    weight = tf.cast(tmp_weight, tf.float64)
+                elif self.inputs.dtype == 'float32':
+                    weight = tf.cast(tmp_weight, tf.float32)
+                else:
+                    ValueError('Input data type should be float for input and weight multiplication.')
+                weightMatrix.append(weight)
+
+        return weightMatrix
+
 
     def genBias(self):
-        # Check data type.
-        if self.inputs.dtype == 'float64':
-            tmp_bias = tf.Variable(tf.random_normal([self.outputDim]))
-            bias = tf.cast(tmp_bias, tf.float64)
-        elif self.inputs.dtype == 'float32':
-            tmp_bias = tf.Variable(tf.random_normal([self.outputDim]))
-            bias = tf.cast(tmp_bias, tf.float32)
+
+        biasMatrix = []
+        if self.num_hidden == 1:
+            tmp_bias = tf.get_variable("bias_0",[self.outputDim],
+                                       initializer=tf.constant_initializer())
+            # Check data type.
+            if self.inputs.dtype == 'float64':
+                bias = tf.cast(tmp_bias, tf.float64)
+            elif self.inputs.dtype == 'float32':
+                bias = tf.cast(tmp_bias, tf.float32)
+            else:
+                ValueError('Input data type should be float for input and weight multiplication.')
+            biasMatrix.append(bias)
         else:
-            ValueError('Input data type should be float for input and weight multiplication.')
-        return bias
+            for num in range(self.num_hidden):
+                if num != self.num_hidden-1:
+                    tmp_bias = tf.get_variable("bias_"+str(num),[self.hiddenUnits[num+1]],
+                                               initializer=tf.constant_initializer())
+                else:
+                    tmp_bias = tf.get_variable("bias_"+str(num),[self.outputDim],
+                                               initializer=tf.constant_initializer())
+                # Check data type.
+                if self.inputs.dtype == 'float64':
+                    bias = tf.cast(tmp_bias, tf.float64)
+                elif self.inputs.dtype == 'float32':
+                    bias = tf.cast(tmp_bias, tf.float32)
+                else:
+                    ValueError('Input data type should be float for input and weight multiplication.')
+                biasMatrix.append(bias)
+
+        return biasMatrix
 
 
     def genSymbol(self):

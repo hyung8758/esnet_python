@@ -13,18 +13,22 @@ import tensorflow.contrib.rnn as rnn
 class RNNModel(object):
 
     def __init__(self,inputSymbol,outputSymbol,rnnCell,problem,hiddenLayer,trainEpoch,learningRate,
-                 learningRateDecay,timeStep,batchSize,dropout,validationCheck,weightMatrix,biasMatrix):
+                 learningRateDecay,timeStep,batchSize,dropout,validationCheck,plotGraph,weightMatrix,biasMatrix):
         self.input_x = inputSymbol
         self.input_y = outputSymbol
         self.rnnCell = rnnCell
         self.problem = problem
-        self.num_hidden_layers = len(hiddenLayer)
+        self.hiddenLayer = hiddenLayer
+        self.num_hidden_layers = len(self.hiddenLayer)
         self.trainEpoch = trainEpoch
         self.lr = learningRate
         self.timeStep = timeStep
         self.batchSize = batchSize
         self.dropout = dropout
+        global drop_prob
+        drop_prob = 0.9
         self.validationCheck = validationCheck
+        self.plotGraph = plotGraph
         self.weightMatrix = weightMatrix
         self.biasMatrix = biasMatrix
         # Setting for LearningRateDecay option.
@@ -68,25 +72,46 @@ class RNNModel(object):
 
         # Set RNN cell type.
         if self.rnnCell == 'rnn':
-            rnn_cell = rnn.BasicRNNCell(self.weightMatrix.get_shape()[0].value)
+            def cell_generator(num,dropoutOption):
+                rnn_cell = rnn.BasicRNNCell(num)
+                # Set the dropout option.
+                if dropoutOption == 'on':
+                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=drop_prob)
+                return rnn_cell
+
         elif self.rnnCell == 'lstm':
-            rnn_cell = rnn.BasicLSTMCell(self.weightMatrix.get_shape()[0].value, forget_bias=1.0)
+            def cell_generator(num,dropoutOption):
+                rnn_cell = rnn.BasicLSTMCell(num, forget_bias=1.0)
+                # Set the dropout option.
+                if dropoutOption == 'on':
+                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=drop_prob)
+                return rnn_cell
+
         elif self.rnnCell == 'gru':
-            rnn_cell = rnn.GRUCell(self.weightMatrix.get_shape()[0].value)
-        # Set the dropout option.
-        if self.dropout == 'on':
-            rnn_cell = rnn.DropoutWrapper(rnn_cell)
+            def cell_generator(num,dropoutOption):
+                rnn_cell = rnn.GRUCell(num)
+                # Set the dropout option.
+                if dropoutOption == 'on':
+                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=drop_prob)
+                return rnn_cell
+
         # Set the number of hidden layers.
         if self.num_hidden_layers > 1:
             print('RNN cell is stacked on MultiRNNCell since it has {} hidden Layers.'.format(self.num_hidden_layers))
-            rnn_cell = rnn.MultiRNNCell([rnn_cell] * self.num_hidden_layers)
+            rnn_cell = rnn.MultiRNNCell([cell_generator(_,self.dropout) for _ in self.hiddenLayer])
+            if self.dropout == 'on':
+                rnn_cell = rnn.DropoutWrapper(rnn_cell,output_keep_prob=drop_prob)
+        else:
+            rnn_cell = cell_generator(self.hiddenLayer[0],self.dropout)
+            if self.dropout == 'on':
+                rnn_cell = rnn.DropoutWrapper(rnn_cell, output_keep_prob=drop_prob)
 
         # Get rnn cell output
         outputs, states = tf.nn.dynamic_rnn(rnn_cell, self.input_x, dtype=self.dtype)
 
         # batch_size * timeStep
         outputs = tf.reshape(outputs, [-1, outputs.get_shape()[2].value])
-        self.pred_val = tf.matmul(outputs, self.weightMatrix) + self.biasMatrix
+        self.pred_val = tf.matmul(outputs, self.weightMatrix[-1]) + self.biasMatrix[-1]
 
         # Define loss and optimizer
         if self.problem is 'classification':
@@ -113,6 +138,10 @@ class RNNModel(object):
         self.rnn_sess = tf.Session()
         self.rnn_sess.run(self.init)
 
+        if self.plotGraph == 'on':
+            writer = tf.summary.FileWriter('./rnn_graphs', self.rnn_sess.graph)
+            writer.close()
+
         if self.validationCheck == 'on':
             train_num = train_inputs.shape[0]
             val_num = int(train_num * 0.2)
@@ -133,7 +162,7 @@ class RNNModel(object):
                 batch_x = train_inputs[start:last]
                 batch_y = train_targets[start:last]
                 batch_y = np.reshape(batch_y,[-1, batch_y.shape[2]])
-                _, loss = self.rnn_sess.run([self.optimizer,self.last_out],
+                _,loss = self.rnn_sess.run([self.optimizer,self.last_out],
                                         feed_dict={self.input_x: batch_x, self.input_y: batch_y})
                 # Calculate mean loss.
                 total_loss.append(loss)
@@ -170,8 +199,9 @@ class RNNModel(object):
             print("Tested with " + str(test_inputs.shape[0]) + " datasets.\n" + "Test Accuracy: " + "{:.2f}".format(result * 100) + " %")
 
         elif self.problem is 'regression':
+            test_targets = np.reshape(test_targets, [-1, test_targets.shape[2]])
             result, self.y_hat = self.rnn_sess.run([self.last_out,self.pred_val], feed_dict={self.input_x: test_inputs, self.input_y: test_targets})
-            print("Tested with " + str(test_targets.shape[2])+ " datasets.\n" + "Test Error: " + "{:.4f}".format(result) + " %")
+            print("Tested with " + str(test_targets.shape[0])+ " datasets.\n" + "Test Error: " + "{:.4f}".format(result))
 
 
     def getVariables(self):

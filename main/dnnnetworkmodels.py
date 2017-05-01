@@ -13,7 +13,7 @@ import main.visualtools as vt
 class DNNmodel(object):
 
     def __init__(self,inputSymbol,outputSymbol,problem,fineTrainEpoch,fineLearningRate,learningRateDecay,batchSize,
-                      hiddenFunction,costFunction,validationCheck,weightMatrix,biasMatrix,plotGraph='off'):
+                      hiddenFunction,costFunction,validationCheck,plotGraph,weightMatrix,biasMatrix):
         self.input_x = inputSymbol
         self.input_y = outputSymbol
         self.problem = problem
@@ -22,9 +22,9 @@ class DNNmodel(object):
         self.hiddenFunction = hiddenFunction
         self.costFunction = costFunction
         self.validationCheck = validationCheck
+        self.plotGraph = plotGraph
         self.weightMatrix = weightMatrix
         self.biasMatrix = biasMatrix
-        self.plotGraph = plotGraph
         # Setting for LearningRateDecay option.
         if learningRateDecay == 'on':
             self.finelr = tf.train.exponential_decay(fineLearningRate, self.fineTrainEpoch * self.batchSize,
@@ -204,8 +204,6 @@ class RBMmodel(object):
 
     def genRBM(self):
         # Generate RBM structure.
-        # self.next_inputs = np.array([],'float32')
-
         # hidden0
         hidden0Array = tf.nn.sigmoid(tf.matmul(self.input_x,self.vhMatrix) + self.hBiasMatrix)
 
@@ -235,9 +233,6 @@ class RBMmodel(object):
         # Activate the graph.
         self.rbm_sess = tf.Session()
         self.rbm_sess.run(self.init)
-        if self.plotGraph == 'on':
-            writer = tf.summary.FileWriter('./rbm_graphs', self.dnn_sess.graph)
-            writer.close()
 
         for hid in range(self.hiddenNumber):
             # Distribute variables.
@@ -282,8 +277,7 @@ class RBMmodel(object):
                         saved_error = np.vstack((saved_error,err))
 
                     # Get all the newly generated inputs for next hidden layer's inputs.
-                print('{:3d}/{:3d} Hidden Layer, {:3d}/{:3d} epoch'.format(hid + 1, self.hiddenNumber, epoch + 1, self.preTrainEpoch))
-                print('MSE: ' + str(np.mean(saved_error)))
+                print('{:3d}/{:3d} Hidden Layer, {:3d}/{:3d} epoch, MSE: {}'.format(hid + 1, self.hiddenNumber, epoch + 1, self.preTrainEpoch,str(np.mean(saved_error))))
                 # Change input value.
                 if epoch+1 == self.preTrainEpoch:
                     cut_zeros_inputs = all_inputs[self.batchSize::,:]

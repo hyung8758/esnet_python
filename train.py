@@ -25,8 +25,8 @@ batchSize = 100
 hiddenLayers = [100] # More than one hidden layer can be inserted. e.g.,[100,100]
 hiddenFunction= 'sigmoid' # sigmoid, tanh
 costFunction = 'adam' # gradient, adam
-validationCheck = 'on' # If validationCheck is on, then 20% of train data will be taken for validation.
-PlotGraph = 'off' # If this is on, graph will be saved in the dnn_graph directory.
+validationCheck = 'off' # If validationCheck is on, then 20% of train data will be taken for validation.
+plotGraph = 'off' # If this is on, graph will be saved in the dnn_graph directory.
                   # You can check the dnn structure on the tensorboard.
 preTrainEpoch = 10 # rbm epoch.
 preLearningRate = 0.01 # rbm learning rate.
@@ -45,8 +45,7 @@ print('Setting default parameters...')
 # Setting default values by using setvalues.
 RBM_values = set.setParam(inputData=inputData,
                           targetData=targetData,
-                          hiddenUnits=hiddenLayers
-                          )
+                          hiddenUnits=hiddenLayers)
 
 # Setting hidden layers: weightMatrix and biasMatrix
 rbm_weightMatrix = RBM_values.genWeight()
@@ -59,8 +58,7 @@ rbm = net.RBMmodel(inputSymbol=rbm_input_x,
                    preLearningRate=preLearningRate,
                    batchSize=batchSize,
                    weightMatrix=rbm_weightMatrix,
-                   biasMatrix=rbm_biasMatrix,
-                   )
+                   biasMatrix=rbm_biasMatrix)
 
 # Generate RBM network.
 rbm.genRBM()
@@ -75,8 +73,8 @@ rbm.closeRBM()
 # Setting default values by using setvalues.
 DNN_values = set.setParam(inputData=inputData,
                           targetData=targetData,
-                          hiddenUnits=hiddenLayers
-                          )
+                          hiddenUnits=hiddenLayers)
+
 # Retrieve the weight and bias parameters from RBM training.
 pretrained_weightMatrix = rbm_vars["weight"]
 pretrained_biasMatrix = rbm_vars["bias"]
@@ -96,10 +94,9 @@ dnn = net.DNNmodel(inputSymbol=input_x,
                    hiddenFunction=hiddenFunction,
                    costFunction=costFunction,
                    validationCheck=validationCheck,
+                   plotGraph=plotGraph,
                    weightMatrix=weightMatrix,
-                   biasMatrix=biasMatrix,
-                   PlotGraph=PlotGraph
-                   )
+                   biasMatrix=biasMatrix)
 
 # Generate DNN network.
 dnn.genDNN()
@@ -137,15 +134,16 @@ PlotGraph = 'off' # If this is on, graph will be saved in the rnn_graph director
                   # You can check the dnn structure on the tensorboard.
 
 print('Loading the data and setting default values...')
+# Data for classification.
 inputData, targetData, test_in, test_out = lf.readmnist()
+# Data for regression.
 # inputData, targetData, test_in, test_out = lf.readartmfcc()
 
 print('Setting default parameters...')
 # Setting default values by using SetValues.
 DNN_values = set.setParam(inputData=inputData,
                           targetData=targetData,
-                          hiddenUnits=hiddenLayers
-                          )
+                          hiddenUnits=hiddenLayers)
 
 # Setting hidden layers: weightMatrix and biasMatrix
 weightMatrix = DNN_values.genWeight()
@@ -164,10 +162,9 @@ dnn = net.DNNmodel(inputSymbol=input_x,
                    hiddenFunction=hiddenFunction,
                    costFunction=costFunction,
                    validationCheck=validationCheck,
+                   plotGraph=plotGraph,
                    weightMatrix=weightMatrix,
-                   biasMatrix=biasMatrix,
-                   PlotGraph=PlotGraph
-                   )
+                   biasMatrix=biasMatrix)
 
 # Generate DNN network.
 dnn.genDNN()
@@ -188,15 +185,14 @@ dnn.closeDNN()
 ########################################################################################################################
 ### RNN(basic, lstm, gru)
 
-import _pickle as pickle
-import numpy as np
 import main.setvalues as set
 import main.rnnnetworkmodels as net
+import main.loadfile as lf
 
 # regression
 problem = 'regression' # classification, regression
 rnnCell = 'lstm' # rnn, lstm, gru
-trainEpoch = 10
+trainEpoch = 3
 learningRate = 0.001
 learningRateDecay = 'off' # on, off
 batchSize = 100
@@ -205,58 +201,49 @@ hiddenLayers = [200]
 timeStep = 17
 costFunction = 'adam' # gradient, adam
 validationCheck = 'off' # if validationCheck is on, then 20% of train data will be taken for validation.
-PlotGraph = 'off' # If this is on, graph will be saved in the rnn_graph directory.
+plotGraph = 'off' # If this is on, graph will be saved in the rnn_graph directory.
                   # You can check the network structure on the tensorboard.
 
 # Import data
 # new_acoustics_vowel and new_articulation_vowel
-with open("train_data/new_acoustics.pckl", "rb") as f:
-    acoustics = pickle.load(f)
-    # acoustics = dt.momentumSigmoid(acoustics,0.25)
-    train_input = np.reshape(acoustics[0:18000],[18000,17,39])
-    test_input = np.reshape(acoustics[18000:20000],[2000,17,39])
-with open("train_data/new_articulation.pckl", "rb") as f:
-    articulations = pickle.load(f)
-    # articulations = dt.momentumSigmoid(articulations,0.1)
-    train_output = np.reshape(articulations[0:18000],[18000,17,14])
-    test_output = np.reshape(articulations[18000:20000],[2000,17,14])
+train_input, train_output, test_input, test_output = lf.readartandacou()
 
 # input should be three dimensional. [# of examples, # of timesteps, # of features]
-lstm_values = set.RNNParam(inputData=train_input,
-                                 targetData=train_output,
-                                 timeStep=timeStep,
-                                 hiddenUnits=hiddenLayers
-                                 )
+rnn_values = set.RNNParam(inputData=train_input,
+                          targetData=train_output,
+                          timeStep=timeStep,
+                          hiddenUnits=hiddenLayers)
 
 # Setting hidden layers: weightMatrix and biasMatrix
-lstm_weightMatrix = lstm_values.genWeight()
-lstm_biasMatrix = lstm_values.genBias()
-lstm_input_x,lstm_input_y = lstm_values.genSymbol()
+rnn_weightMatrix = rnn_values.genWeight()
+rnn_biasMatrix = rnn_values.genBias()
+rnn_input_x,rnn_input_y = rnn_values.genSymbol()
 
-lstm_net = net.RNNModel(inputSymbol=lstm_input_x,
-                        outputSymbol=lstm_input_y,
-                        rnnCell=rnnCell,
-                        problem=problem,
-                        hiddenLayer=hiddenLayers,
-                        trainEpoch=trainEpoch,
-                        learningRate=learningRate,
-                        learningRateDecay=learningRateDecay,
-                        timeStep=timeStep,
-                        batchSize=batchSize,
-                        dropout=dropout,
-                        validationCheck=validationCheck,
-                        weightMatrix=lstm_weightMatrix,
-                        biasMatrix=lstm_biasMatrix)
+rnn_net = net.RNNModel(inputSymbol=rnn_input_x,
+                       outputSymbol=rnn_input_y,
+                       rnnCell=rnnCell,
+                       problem=problem,
+                       hiddenLayer=hiddenLayers,
+                       trainEpoch=trainEpoch,
+                       learningRate=learningRate,
+                       learningRateDecay=learningRateDecay,
+                       timeStep=timeStep,
+                       batchSize=batchSize,
+                       dropout=dropout,
+                       validationCheck=validationCheck,
+                       plotGraph=plotGraph,
+                       weightMatrix=rnn_weightMatrix,
+                       biasMatrix=rnn_biasMatrix)
 
 # Generate a RNN network.
-lstm_net.genRNN()
+rnn_net.genRNN()
 # Train the RNN network.
-lstm_net.trainRNN(train_input,train_output)
+rnn_net.trainRNN(train_input,train_output)
 # Test the trained RNN network.
-lstm_net.testRNN(test_input,test_output)
+rnn_net.testRNN(test_input,test_output)
 # Save the trained parameters.
-vars = lstm_net.getVariables()
+vars = rnn_net.getVariables()
 # Terminate the session.
-lstm_net.closeRNN()
+rnn_net.closeRNN()
 
 
