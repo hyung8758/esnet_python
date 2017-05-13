@@ -2,7 +2,7 @@
 '''
 
 
-                                                                    Written by Hyungwon Yang
+                                                                               Hyungwon Yang
                                                                                 2016. 03. 09
                                                                                    EMCS Labs
 '''

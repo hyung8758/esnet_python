@@ -5,11 +5,21 @@ understand its structure and usage.
 It is written based on tensorflow.
 
 Support: DNN, RBM, RNN(LSTM)
-                                                                    Written by Hyungwon Yang
+
+Tutorial contents.
+(1) RBM and DNN training.
+(2) DNN training.
+(3) CNN training. (not yet supported)
+(4) RNN training.
+
+                                                                               Hyungwon Yang
                                                                                 2017. 02. 26
                                                                                    EMCS Labs
 '''
 
+
+######################################################################################
+### (1) RBM & DNN
 import main.loadfile as lf
 import main.setvalues as set
 import main.dnnnetworkmodels as net
@@ -31,12 +41,10 @@ plotGraph = 'off' # If this is on, graph will be saved in the dnn_graph director
 preTrainEpoch = 10 # rbm epoch.
 preLearningRate = 0.01 # rbm learning rate.
 
-######################################################################################
-### RBM & DBN
 
 # Load datasets.
 print('Loading the data and setting default values...')
-# # MNIST: classification
+# MNIST: classification
 inputData, targetData, test_in, test_out = lf.readmnist()
 # mfcc: regression
 # inputData, targetData, test_in, test_out = lf.readartmfcc()
@@ -79,6 +87,7 @@ DNN_values = set.setParam(inputData=inputData,
 pretrained_weightMatrix = rbm_vars["weight"]
 pretrained_biasMatrix = rbm_vars["bias"]
 
+# Use pretrained weight and bias for DNN training.
 weightMatrix = DNN_values.setWeight(pretrained_weightMatrix)
 biasMatrix = DNN_values.setBias(pretrained_biasMatrix)
 input_x, input_y = DNN_values.genSymbol()

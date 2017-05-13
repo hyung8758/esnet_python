@@ -2,7 +2,7 @@
 '''
 For setting default values of ANN and DBN.
 
-                                                                    Written by Hyungwon Yang
+                                                                               Hyungwon Yang
                                                                                 2016. 02. 10
                                                                                    EMCS Labs
 '''
@@ -212,6 +212,7 @@ class RNNParam(object):
             else:
                 ValueError('Input data type should be float for input and weight multiplication.')
             biasMatrix.append(bias)
+
         else:
             for num in range(self.num_hidden):
                 if num != self.num_hidden-1:

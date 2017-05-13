@@ -1,4 +1,4 @@
-# This is HY_python_NN. 
+# Easy and Simple Neural nETwork: esnet (python version.)
                                                               Hyungwon Yang
                                                                  2015.02.02
                                                                    EMCS lab
@@ -6,7 +6,10 @@
 
 ### Machine learning toolbox based on Python and Tensorflow.
 ---
-This toolbox is easy to implement to your research. 
+
+- This toolbox is easy to implement to your research. 
+- Just focus on neural network parameters such as the number of hidden layers and units or activation functions. 
+Then a main network based on given parameters will be automatically generated for a task.
 
 
 ### Version Compatibility
@@ -14,18 +17,21 @@ This toolbox is easy to implement to your research.
 
 - Linux and MacOSX (This script is not tested on Windows)
 - Python 3.5 and 3.6 (Python2 is not supported)
-- tensorflow 1.1
+- Tensorflow 1.1
 
 ### CONTENTS
 ---
-- Machine learning scripts for classification & regression problems.
+- Machine learning scripts for classification and regression problems.
  1. main(dir) : Codes that build and run various neural networks are stored in this directory.
- 2. reports(dir): Exeperiments such as comparing between or among machine learning task performances or replicating other scholars' works related to machine learning tasks are implemented and reported in this directory.
- 3. train_data(dir): Small set of training and testing data (some of them are already preprocessed for convenience's sake) are ready for implementing simple experiments or testing newly structued networks.
- 4. train.py(script): This script shows how to build various nerual networks and train and test them with diverse datasets. 
+ 2. reports(dir): Experiments such as comparing between or among machine learning task performances or replicating other scholars' works related to machine learning tasks are implemented and reported in this directory.
+ 3. train_data(dir): Small set of training and testing data (some of them are already preprocessed for convenience's sake) are ready for implementing simple experiments or testing newly structured networks.
+ 4. train.py(script): This script shows how to build various neural networks and train and test them with diverse datasets. 
 		
 ### CONTACTS
 ---------------------------------------------------------------------------
+
+Should you have any question while using this toolbox, please do not hesitate to contact Hyungwon Yang. 
+(bug reports or suggestions for developing the toolbox are always welcomed.)
 
 - Developer: Hyungwon Yang (hyung8758@gmail.com)
 - Advisor: Hosung Nam 
@@ -38,7 +44,7 @@ This toolbox is easy to implement to your research.
  All 8 scripts were added. 
  - loadfile: It contains example files for running scripts.
  - ANN_model: This script constructs ANN and DBN networks. 
- Feedforward neural network and stochastic gradient descent.
+ Feed-forward neural network and stochastic gradient descent.
  - SetValues: This class initiates all the default values including inputs, 
  outputs, weight and biases
  - errortools: Visual plotting and error calculation. 
@@ -62,6 +68,6 @@ This toolbox is easy to implement to your research.
 
 2.2 (2017.05.01)
  - Compatibility update with tensorflow version 1.1 
- - Downloading function is added to loadfile.py so downloader.py is removed.
+ - Downloading function is merged to loadfile.py so downloader.py is removed.
  - Minor bugs are fixed. 
- - Printing more detail informaiton.
+ - During training session, network settings and processing information will be printed on the command line.

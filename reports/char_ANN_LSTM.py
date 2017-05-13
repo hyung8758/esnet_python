@@ -83,7 +83,7 @@ train_input, train_output, test_input, test_output = lf.readpg8800rnnchar()
 
 # parameters
 problem = 'classification' # classification, regression
-rnnCell = 'gru' # rnn, lstm, gru
+rnnCell = 'lstm' # rnn, lstm, gru
 trainEpoch = 10
 learningRate = 0.001
 learningRateDecay = 'off' # on, off

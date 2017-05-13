@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
+
 loadfile.py is written for importing data conveniently.
 
 - Curvefitting (function name / data name)
@@ -13,7 +14,7 @@ loadfile.py is written for importing data conveniently.
 	2. readcancer / cancerData.mat
 	3. readpg8800rnnchar / 
 
-																	Written by Hyungwon Yang
+																	   		   Hyungwon Yang
 																				2016. 02. 10
 																					EMCS Lab
 '''

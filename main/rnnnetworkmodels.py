@@ -1,7 +1,7 @@
 '''
 Machine Learning Network for RNN, LSTM, and GRU(will be supported soon).
 
-                                                                    Written by Hyungwon Yang
+                                                                               Hyungwon Yang
                                                                                 2016. 02. 07
                                                                                     EMCS Lab
 '''

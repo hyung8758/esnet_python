@@ -3,7 +3,7 @@
 Manipulating data for them to be fit into training process.
 This code was refered from
 
-                                                                    Written by Hyungwon Yang
+                                                                               Hyungwon Yang
                                                                                 2016. 02. 10
                                                                                    EMCS Labs
 '''
@@ -34,7 +34,7 @@ def momentumSigmoid(data,momentum):
     return 1 / (1 + np.exp(-momentum * data))
 
 # Make raw text file that can be trainable in ANN (# of example * # of feature.)
-def text2rnnonehot(text,delimiter=' ',timeStep=0):
+def text2rnnonehot(text,delimiter=' ',timestep=0):
     with open(text, 'r') as train_n:
         in_txt = train_n.readlines()
         tmp_txt = in_txt[0].split(delimiter)
@@ -44,7 +44,7 @@ def text2rnnonehot(text,delimiter=' ',timeStep=0):
     data_size = len(tmp_txt)
 
     # Generate dataset.
-    if timeStep == 0: # ann
+    if timestep == 0: # ann
         input_txt = np.zeros((data_size, vocab_size))
         output_txt = np.zeros((data_size, vocab_size))
         for dat in range(data_size):
@@ -67,15 +67,15 @@ def text2rnnonehot(text,delimiter=' ',timeStep=0):
         onehot_data = (input_txt, output_txt)
 
     else: # rnn
-        if data_size%timeStep != 0:
+        if data_size%timestep != 0:
             print("WARNNING: DATA CLIPPING")
             print("Input data cannot be clearly divided into timeStep:{}. Last {} examples will be discarded.".format(timeStep,data_size%timeStep))
             print("Provide different number of timeStep to save input data.")
         his = 0
-        input_txt = np.zeros((int(data_size / timeStep), timeStep, vocab_size))
-        output_txt = np.zeros((int(data_size / timeStep), timeStep, vocab_size))
-        for dat in list(range(int(data_size/timeStep)-1)):
-            for times in list(range(timeStep)):
+        input_txt = np.zeros((int(data_size / timestep), timestep, vocab_size))
+        output_txt = np.zeros((int(data_size / timestep), timestep, vocab_size))
+        for dat in list(range(int(data_size/timestep)-1)):
+            for times in list(range(timestep)):
                 input_sym = tmp_txt[his]
                 output_sym = tmp_txt[his + 1]
                 input_idx = uniq_word.index(input_sym)

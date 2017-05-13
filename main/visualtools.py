@@ -2,7 +2,7 @@
 """
 Errortools for calculating the errors of your networks and visualizing the results.
 
-                                                                    Written by Hyungwon Yang
+                                                                               Hyungwon Yang
                                                                                 2016. 02. 25
                                                                                    EMCS Labs
 """
