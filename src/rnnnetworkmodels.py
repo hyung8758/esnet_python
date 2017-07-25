@@ -1,5 +1,5 @@
 '''
-Machine Learning Network for RNN, LSTM, and GRU(will be supported soon).
+Machine Learning Network for RNN, LSTM, and GRU.
 
                                                                                Hyungwon Yang
                                                                                 2016. 02. 07
@@ -25,8 +25,6 @@ class RNNModel(object):
         self.timeStep = timeStep
         self.batchSize = batchSize
         self.dropout = dropout
-        global drop_prob
-        drop_prob = 0.9
         self.validationCheck = validationCheck
         self.plotGraph = plotGraph
         self.weightMatrix = weightMatrix
@@ -35,10 +33,10 @@ class RNNModel(object):
         if learningRateDecay == 'on':
             self.lr = tf.train.exponential_decay(learningRate, self.trainEpoch * self.batchSize,
                                                  self.batchSize, 0.96, staircase=True)
-            self.lrOpt='Exponential Decay'
+            self.lrOpt = 'Exponential Decay'
         elif learningRateDecay == 'off':
             self.lr = learningRate if learningRate is not None else 0.01
-            self.lrOpt=str(self.lr)
+            self.lrOpt = str(self.lr)
         else:
             print('learningRateDecay option is not properly set. It will be off as a default.')
             self.lr = learningRate if learningRate is not None else 0.01
@@ -69,14 +67,13 @@ class RNNModel(object):
 
 
     def genRNN(self):
-
         # Set RNN cell type.
         if self.rnnCell == 'rnn':
             def cell_generator(num,dropoutOption):
                 rnn_cell = rnn.BasicRNNCell(num)
                 # Set the dropout option.
                 if dropoutOption == 'on':
-                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=drop_prob)
+                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=0.9)
                 return rnn_cell
 
         elif self.rnnCell == 'lstm':
@@ -84,7 +81,7 @@ class RNNModel(object):
                 rnn_cell = rnn.BasicLSTMCell(num, forget_bias=1.0)
                 # Set the dropout option.
                 if dropoutOption == 'on':
-                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=drop_prob)
+                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=0.9)
                 return rnn_cell
 
         elif self.rnnCell == 'gru':
@@ -92,7 +89,7 @@ class RNNModel(object):
                 rnn_cell = rnn.GRUCell(num)
                 # Set the dropout option.
                 if dropoutOption == 'on':
-                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=drop_prob)
+                    rnn_cell = rnn.DropoutWrapper(rnn_cell,input_keep_prob=0.9)
                 return rnn_cell
 
         # Set the number of hidden layers.
@@ -100,11 +97,11 @@ class RNNModel(object):
             print('RNN cell is stacked on MultiRNNCell since it has {} hidden Layers.'.format(self.num_hidden_layers))
             rnn_cell = rnn.MultiRNNCell([cell_generator(_,self.dropout) for _ in self.hiddenLayer])
             if self.dropout == 'on':
-                rnn_cell = rnn.DropoutWrapper(rnn_cell,output_keep_prob=drop_prob)
+                rnn_cell = rnn.DropoutWrapper(rnn_cell,output_keep_prob=0.9)
         else:
             rnn_cell = cell_generator(self.hiddenLayer[0],self.dropout)
             if self.dropout == 'on':
-                rnn_cell = rnn.DropoutWrapper(rnn_cell, output_keep_prob=drop_prob)
+                rnn_cell = rnn.DropoutWrapper(rnn_cell, output_keep_prob=0.9)
 
         # Get rnn cell output
         outputs, states = tf.nn.dynamic_rnn(rnn_cell, self.input_x, dtype=self.dtype)

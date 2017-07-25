@@ -175,9 +175,9 @@ lstm_net = net.simpleLSTMmodel(inputSymbol=lstm_input_x,
 
 lstm_net.genLSTM()
 
-lstm_net.trainLSTM(train_input,train_output)
+lstm_net.trainLSTM(lstm_train_inputs,lstm_train_outputs)
 
-lstm_net.testLSTM(test_input,test_output)
+# lstm_net.testLSTM(lstm_test_inputs,lstm_test_outputs)
 
 vars = lstm_net.getVariables()
 

@@ -1,40 +1,39 @@
-# -*- coding: utf-8 -*-
-'''
+"""
 Manipulating data for them to be fit into training process.
-This code was refered from
 
                                                                                Hyungwon Yang
                                                                                 2016. 02. 10
                                                                                    EMCS Labs
-'''
-
+"""
 import numpy as np
 
-def normalize(data,type,axis=0):
+
+def normalize(data, type, axis=0):
+
     if type == 'sigmoid':
         tmp_data = 1 / (1 + np.exp(-data))
-        normalized_data = [tmp_data]
+        return [tmp_data]
     elif type == 'tanh':
         tmp_data = np.tanh(data)
-        normalized_data = [tmp_data]
+        return [tmp_data]
     elif type == 'zscore':
         mu = np.mean(data, axis, keepdims=True)
         std = np.std(data, axis, keepdims=True)
         out = (data - mu) / std
-        normalized_data = [out, mu, std]
+        return [out, mu, std]
     elif type == 'minmax':
         min_val = np.amin(data, axis=axis)
         max_val = np.amax(data, axis=axis)
         out = (data - min_val) * 2 / max_val - 1
-        normalized_data = [out, min_val, max_val]
+        return [out, min_val, max_val]
 
-    return normalized_data
 
 def momentumSigmoid(data,momentum):
     return 1 / (1 + np.exp(-momentum * data))
 
+
 # Make raw text file that can be trainable in ANN (# of example * # of feature.)
-def text2rnnonehot(text,delimiter=' ',timestep=0):
+def text2rnnonehot(text, delimiter=' ', timestep=0):
     with open(text, 'r') as train_n:
         in_txt = train_n.readlines()
         tmp_txt = in_txt[0].split(delimiter)
@@ -44,7 +43,8 @@ def text2rnnonehot(text,delimiter=' ',timestep=0):
     data_size = len(tmp_txt)
 
     # Generate dataset.
-    if timestep == 0: # ann
+    # ann
+    if timestep == 0:
         input_txt = np.zeros((data_size, vocab_size))
         output_txt = np.zeros((data_size, vocab_size))
         for dat in range(data_size):
@@ -60,16 +60,18 @@ def text2rnnonehot(text,delimiter=' ',timestep=0):
                 input_idx = uniq_word.index(input_sym)
                 input_txt[dat][input_idx] = 1
 
-        data_shape = (data_size,vocab_size)
+        data_shape = (data_size, vocab_size)
 
         print('Text file format is transformed successfully.')
-        print("Dataset dimension: examples: {}, features: {}".format(data_shape[0],data_shape[1]))
-        onehot_data = (input_txt, output_txt)
+        print("Dataset dimension: examples: {}, features: {}".format(data_shape[0], data_shape[1]))
+        return input_txt, output_txt
 
-    else: # rnn
+    # rnn
+    else:
         if data_size%timestep != 0:
             print("WARNNING: DATA CLIPPING")
-            print("Input data cannot be clearly divided into timeStep:{}. Last {} examples will be discarded.".format(timeStep,data_size%timeStep))
+            print("Input data cannot be clearly divided into timeStep:{}. Last {} examples will be discarded."
+                  .format(timestep, data_size%timestep))
             print("Provide different number of timeStep to save input data.")
         his = 0
         input_txt = np.zeros((int(data_size / timestep), timestep, vocab_size))
@@ -86,8 +88,6 @@ def text2rnnonehot(text,delimiter=' ',timestep=0):
 
         data_shape = input_txt.shape
         print('Text file format is transformed successfully.')
-        print("Dataset dimension: examples: {}, timeStep: {}, features: {}".format(data_shape[0],data_shape[1],data_shape[2]))
-        onehot_data = (input_txt, output_txt)
-
-    return onehot_data
-
+        print("Dataset dimension: examples: {}, timeStep: {}, features: {}"
+              .format(data_shape[0], data_shape[1], data_shape[2]))
+        return input_txt, output_txt

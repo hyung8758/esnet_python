@@ -6,7 +6,7 @@ LSTM network for truncated BPTT training.
 
 import numpy as np
 import tensorflow as tf
-import main.loadfile as lf
+import src.loadfile as lf
 
 # Import data
 train_input, train_output, test_input, test_output = lf.readpg8800rnnchar()

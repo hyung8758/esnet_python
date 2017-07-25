@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 
 loadfile.py is written for importing data conveniently.
 
@@ -17,15 +17,23 @@ loadfile.py is written for importing data conveniently.
 																	   		   Hyungwon Yang
 																				2016. 02. 10
 																					EMCS Lab
-'''
+"""
 
 import scipy.io as sio
 import numpy as np
 import requests
 import pickle
 import os
+import re
 
-data_path = './train_data'
+# path settings.
+cur_path = os.getcwd()
+result = re.findall('esnet_python', cur_path)
+if result == []:
+	raise ('A script is not running in the esnet_python directory. Please run the script in the esnet_python directory.')
+right_path = re.sub('esnet_python[/a-zA-Z0-9]*','esnet_python',cur_path)
+
+data_path = right_path + '/datasets'
 
 def download_file_from_google_drive(id, destination):
     URL = "https://drive.google.com/uc?export=download"
@@ -63,14 +71,14 @@ def readbody():
 
 	file_check = os.path.exists(data_path+'/bodyData.mat')
 	if file_check is False:
-		print('bodyData.mat is not present in the train_data directory.')
+		print('bodyData.mat is not present in the datasets directory.')
 
 		print("Downloading bodyData.mat...")
 		datafile = "0B9lwe_GFwe2oV2lhbS1PNFdKbnM"
-		savefile = "train_data/bodyData.mat"
+		savefile = data_path+"/bodyData.mat"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
 	source_path = os.path.join(data_path,'bodyData.mat')
 	data = sio.loadmat(source_path)
@@ -92,13 +100,13 @@ def readbuilding():
 
 	file_check = os.path.exists(data_path+'/buildingData.mat')
 	if file_check is False:
-		print('buildingData.mat is not present in the train_data directory.')
+		print('buildingData.mat is not present in the datasets directory.')
 		print("Downloading buildingData.mat...")
 		datafile = "0B9lwe_GFwe2oMmxPalZSY1pEMkU"
-		savefile = "train_data/buildingData.mat"
+		savefile = data_path+"/buildingData.mat"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
 	source_path = os.path.join(data_path,'buildingData.mat')
 	data = sio.loadmat(source_path)
@@ -119,13 +127,13 @@ def readartmfcc():
 
 	file_check = os.path.exists(data_path+'/art_mfcc.mat')
 	if file_check is False:
-		print('art_mfcc.mat is not present in the train_data directory.')
+		print('art_mfcc.mat is not present in the datasets directory.')
 		print("Downloading art_mfcc.mat...")
 		datafile = "0B9lwe_GFwe2oOXFqVzBlSWFYdDA"
-		savefile = "train_data/art_mfcc.mat"
+		savefile = data_path+"/art_mfcc.mat"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
 	source_path = os.path.join(data_path,'art_mfcc.mat')
 	data = sio.loadmat(source_path)
@@ -147,29 +155,29 @@ def readartandacou():
 
 	file_check = os.path.exists(data_path+'/new_acoustics.pckl')
 	if file_check is False:
-		print('new_acoustics.pckl is not present in the train_data directory.')
+		print('new_acoustics.pckl is not present in the datasets directory.')
 		print("Downloading art_new_acoustics.pckl...")
 		datafile = "0B9lwe_GFwe2oS2lTZG1oQ2ZCejQ"
-		savefile = "train_data/new_acoustics.pckl"
+		savefile = data_path+"/new_acoustics.pckl"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
 	file_check = os.path.exists(data_path+'/new_articulation.pckl')
 	if file_check is False:
-		print('new_articulation.pckl is not present in the train_data directory.')
+		print('new_articulation.pckl is not present in the datasets directory.')
 		print("Downloading art_new_articulation.pckl...")
 		datafile = "0B9lwe_GFwe2oMkFVdzE1QXhOdG8"
-		savefile = "train_data/new_articulation.pckl"
+		savefile = data_path+"/new_articulation.pckl"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
-	with open("train_data/new_acoustics.pckl", "rb") as f:
+	with open(data_path+"/new_acoustics.pckl", "rb") as f:
 		acoustics = pickle.load(f)
 		train_input = np.reshape(acoustics[0:18000], [18000, 17, 39])
 		test_input = np.reshape(acoustics[18000:20000], [2000, 17, 39])
-	with open("train_data/new_articulation.pckl", "rb") as f:
+	with open(data_path+"/new_articulation.pckl", "rb") as f:
 		articulations = pickle.load(f)
 		train_output = np.reshape(articulations[0:18000], [18000, 17, 14])
 		test_output = np.reshape(articulations[18000:20000], [2000, 17, 14])
@@ -195,30 +203,30 @@ def readmnist(ntrain=60000,ntest=10000,onehot=True):
 
 	file_check = os.path.exists(data_path+'/train-labels-idx1-ubyte')
 	if file_check is False:
-		print('MNIST is not present in the train_data directory.')
+		print('MNIST is not present in the datasets directory.')
 		print("Downloading MNIST...")
 
 		print("Downloading train-labels-idx1-ubyte...")
 		datafile = "0B9lwe_GFwe2oZFRFX21zZUJQV1U"
-		savefile = "train_data/train-labels-idx1-ubyte"
+		savefile = data_path+"/train-labels-idx1-ubyte"
 		download_file_from_google_drive(datafile, savefile)
 
 		print("Downloading train-images-idx3-ubyte...")
 		datafile = "0B9lwe_GFwe2oWmZmYnA3bG8yWGc"
-		savefile = "train_data/train-images-idx3-ubyte"
+		savefile = data_path+"/train-images-idx3-ubyte"
 		download_file_from_google_drive(datafile, savefile)
 
 		print("Downloading t10k-labels-idx1-ubyte...")
 		datafile = "0B9lwe_GFwe2oTmhWenVSUS00eTA"
-		savefile = "train_data/t10k-labels-idx1-ubyte"
+		savefile = data_path+"/t10k-labels-idx1-ubyte"
 		download_file_from_google_drive(datafile, savefile)
 
 		print("Downloading t10k-images-idx3-ubyte...")
 		datafile = "0B9lwe_GFwe2oWHFNT0NPdVBEcms"
-		savefile = "train_data/t10k-images-idx3-ubyte"
+		savefile = data_path+"/t10k-images-idx3-ubyte"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
 	fd = open(os.path.join(data_path,'train-images-idx3-ubyte'))
 	loaded = np.fromfile(file=fd,dtype=np.uint8)
@@ -261,13 +269,13 @@ def readcancer():
 
 	file_check = os.path.exists(data_path+'/cancerData.mat')
 	if file_check is False:
-		print('cancerData.mat is not present in the train_data directory.')
+		print('cancerData.mat is not present in the datasets directory.')
 		print("Downloading cancerData...")
 		datafile = "0B9lwe_GFwe2oNEtSMHFXSWk3Rkk"
-		savefile = "train_data/cancerData.mat"
+		savefile = data_path+"/cancerData.mat"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
 	source_path = os.path.join(data_path,'cancerData.mat')
 	data = sio.loadmat(source_path)
@@ -290,15 +298,15 @@ def readcancer():
 def readpg8800annchar():
 	file_check = os.path.exists(data_path + '/pg8800_ann_char_data.npz')
 	if file_check is False:
-		print('pg8800_ann_char_data.npz is not present in the train_data directory.')
+		print('pg8800_ann_char_data.npz is not present in the datasets directory.')
 		print("Downloading pg8800_ann_char_data.npz...")
 		datafile = "0B9lwe_GFwe2oeWJlMDJKdjg2RXM"
-		savefile = "train_data/pg8800_ann_char_data.npz"
+		savefile = data_path+"/pg8800_ann_char_data.npz"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
-	rnn_data = np.load('train_data/pg8800_ann_char_data.npz')
+	rnn_data = np.load(data_path+"/pg8800_ann_char_data.npz")
 	train_input = rnn_data['train_input'][0:160000]
 	train_output = rnn_data['train_output'][0:160000]
 	test_input = rnn_data['test_input'][0:32000]
@@ -312,15 +320,15 @@ def readpg8800annchar():
 def readpg8800rnnchar():
 	file_check = os.path.exists(data_path + '/pg8800_rnn_char_data.npz')
 	if file_check is False:
-		print('pg8800_rnn_char_data.npz is not present in the train_data directory.')
+		print('pg8800_rnn_char_data.npz is not present in the datasets directory.')
 		print("Downloading pg8800_rnn_char_data.npz...")
 		datafile = "0B9lwe_GFwe2oYlpfbEdMVllOSmc"
-		savefile = "train_data/pg8800_rnn_char_data.npz"
+		savefile = data_path+"/pg8800_rnn_char_data.npz"
 		download_file_from_google_drive(datafile, savefile)
 
-		print("Dataset Downloaded successfully. Check train_data folder.")
+		print("Dataset Downloaded successfully. Check datasets folder.")
 
-	rnn_data = np.load('train_data/pg8800_rnn_char_data.npz')
+	rnn_data = np.load(data_path+"/pg8800_rnn_char_data.npz")
 	train_input = rnn_data['train_input']
 	train_output = rnn_data['train_output']
 	test_input = rnn_data['test_input']

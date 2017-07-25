@@ -17,39 +17,41 @@ Errortools for calculating the errors of your networks and visualizing the resul
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # Calculating Mean Sequare Error
 def mse(target_y,hat_y):
 
-    hat_out = np.concatenate(hat_y,axis=0)
-    hat_line = np.concatenate(hat_out,axis=0)
+    hat_out = np.concatenate(hat_y, axis=0)
+    hat_line = np.concatenate(hat_out, axis=0)
     target_out = target_y[0:len(target_y)]
-    target_line = np.concatenate(target_out,axis=0)
+    target_line = np.concatenate(target_out, axis=0)
 
     # MSE
     mse = np.sum((target_line - hat_line)**2)/(len(target_y)*2)
 
     return mse
 
+
 # Calculating Pearson R correlation coefficients.
 def pearsonR(target_y,hat_y):
 
-    hat_out = np.concatenate(hat_y,axis=0)
-    hat_line = np.concatenate(hat_out,axis=0)
+    hat_out = np.concatenate(hat_y, axis=0)
+    hat_line = np.concatenate(hat_out, axis=0)
     target_out = target_y[0:len(target_y)]
-    target_line = np.concatenate(target_out,axis=0)
+    target_line = np.concatenate(target_out, axis=0)
 
     # Correlation coefficients
-    cor_coefficients = np.corrcoef(hat_line,target_line)[0,1]
+    cor_coefficients = np.corrcoef(hat_line, target_line)[0,1]
     return cor_coefficients
 
 
 # Correlation plot for curvefitting problem (regression)
 def correlationPlot(target_y,hat_y):
 
-    hat_out = np.concatenate(hat_y,axis=0)
-    hat_line = np.concatenate(hat_out,axis=0)
+    hat_out = np.concatenate(hat_y, axis=0)
+    hat_line = np.concatenate(hat_out, axis=0)
     target_out = target_y[0:len(target_y)]
-    target_line = np.concatenate(target_out,axis=0)
+    target_line = np.concatenate(target_out, axis=0)
 
     plt.plot(hat_line,target_line,'o')
     plt.xlabel('Predicted data')

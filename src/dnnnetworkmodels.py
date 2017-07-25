@@ -7,7 +7,8 @@ Machine Learning Network for DNN and RBM.
 '''
 import numpy as np
 import tensorflow as tf
-import main.visualtools as vt
+import src.visualtools as vt
+
 
 ### DNN
 class DNNmodel(object):
